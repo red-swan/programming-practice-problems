@@ -1,0 +1,1 @@
+let lcm x y = x * y / (gcd x y)
