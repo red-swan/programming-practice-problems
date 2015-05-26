@@ -1,0 +1,7 @@
+let rec distribute e = function
+    | [] -> [[e]]
+    | x::xs' as xs -> (e::xs)::[for xs in distributeorig e xs' -> x::xs]
+
+let rec permute = function
+    | [] -> [[]]
+    | e::xs -> List.collect (distributeorig e) (permuteorig xs)
