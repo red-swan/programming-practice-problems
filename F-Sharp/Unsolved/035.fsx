@@ -61,3 +61,12 @@ let allEvens =
 [1 .. 100] |> List.filter cyclesequence
 // This works but has repeat members
 // Thing about cutting down the amount by sieving out the higher numbers if the lower fails
+
+
+// SCRATCH AND FURTHER IDEAS
+rec functionsomething number =
+	if (contains number thelistofnumbersalready) then thelistofnumbers @ (functionsomething number+1) 
+	else checkforcycle
+	
+// The model should be start low, for each input: cycle it to get the listofcycles, add the set to either a list of circularprimes or a list of notcircularprimes, then move to the next input
+// next step should be checking if the input is on either list already
