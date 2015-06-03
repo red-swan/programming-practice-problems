@@ -45,15 +45,32 @@ let cycle number = number / 10 + (number % 10)*( int (10.** float ((List.length 
 let contains x = Seq.exists ((=) x)
 let primeslist = sieveOfAtkin 1000000
 let isprime value = contains value primeslist
-let cyclesequence number = 
-	let rec loop x = seq { yield x; yield! loop (cycle x)}
-	loop number
-		|> Seq.take (List.length (digits number))
-		|> Seq.map isprime
-		|> (contains false)
-		|> not
-		
-let iscircularprime = not (contains FALSE (cyclesequence number))
+
+let getdigitcycle number = 
+    Seq.unfold (fun x-> Some(x, (cycle x))) number
+        |> Seq.take (List.length (digits number))
+let iscircularprime number = 
+    Seq.unfold (fun x-> if(isprime x) then Some(true, (cycle x)) else Some(false,(cycle x))) number
+        |> Seq.take (List.length (digits number))
+        |> Seq.exists ((=) false)
+        |> not
+
+// If the digits contain an even number, then it isn't circular
+let onlyodddigits number = 
+    digits number |> List.map (fun x -> x % 2=0) |> contains true |> not
+
+let candidates = List.filter (onlyodddigits) primeslist |> List.filter iscircularprime
+
+// Runs slow, could be improved with the circular prime function
+
+
+
+
+let mutable temp = set [1 .. 3]
+temp <- Set.map (fun x -> x*x) temp
+
+  
+let iscircularprime = not (contains false (cyclesequence number))
 let allEvens = 
     let rec loop x = seq { yield x; yield! loop (x + 2) }
     loop 0;;
@@ -70,3 +87,7 @@ rec functionsomething number =
 	
 // The model should be start low, for each input: cycle it to get the listofcycles, add the set to either a list of circularprimes or a list of notcircularprimes, then move to the next input
 // next step should be checking if the input is on either list already
+
+
+
+
