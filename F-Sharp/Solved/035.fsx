@@ -55,9 +55,9 @@ let iscircularprime number =
         |> Seq.exists ((=) false)
         |> not
 
-// If the digits contain an even number, then it isn't circular
+// If the digits contain an even number or a 5, then it isn't circular because the offending digit will come around and is divisible
 let onlyodddigits number = 
-    digits number |> List.map (fun x -> x % 2=0) |> contains true |> not
+    digits number |> List.map (fun x -> x % 2=0 || x % 5 = 0) |> contains true |> not
 
 let candidates = List.filter (onlyodddigits) primeslist |> List.filter iscircularprime
 
