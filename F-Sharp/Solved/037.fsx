@@ -66,6 +66,12 @@ let rec onlycandidateprimes number =
     else losdigits |> List.map (fun x -> x % 2=0 || x % 5 = 0) |> contains true |> not
     //THIS KEEPS IN NUMBER LIKE 222255555 with repeated 2's or 5's
 
+// Alternative version of filtering candidates; maybe not optimized either
+let onlycandidateprimes number =
+    let filteritout numberasdigits = numberasdigits |> List.map (fun x -> x % 2=0 || x % 5 = 0) |> contains true |> not
+    let losdigits = digits number
+    if List.head losdigits = 2 || List.head losdigits = 5 then filteritout (List.tail losdigits)
+    else filteritout (List.tail losdigits)
 
 let answer = 
     sieveOfAtkin 1000000
