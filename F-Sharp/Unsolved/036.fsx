@@ -1,4 +1,4 @@
-﻿(*The decimal number, 585 = 10010010012 (binary), is palindromic in both bases.
+﻿(*The decimal number, 585 = 1001001001 (binary), is palindromic in both bases.
 
 Find the sum of all numbers, less than one million, which are palindromic in base 10 and base 2.
 
@@ -8,4 +8,6 @@ Find the sum of all numbers, less than one million, which are palindromic in bas
 
 
 let decdigits number =  [for c in (string number) -> c] |> List.map (fun x -> (int x) - (int '0'))
+let ispalindrome list = list = List.rev list
+
 
