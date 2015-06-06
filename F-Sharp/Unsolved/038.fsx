@@ -13,39 +13,31 @@ What is the largest 1 to 9 pandigital 9-digit number that can be formed as the c
 integer with (1,2, ... , n) where n > 1?*)
 
 
-
-
-
-
-
-
-
-let rec distribute e = function
-    | [] -> [[e]]
-    | x::xs' as xs -> (e::xs)::[for xs in distribute e xs' -> x::xs]
-
-let rec permute = function
-    | [] -> [[]]
-    | e::xs -> List.collect (distribute e) (permute xs)
-
-let digits number = [for k in (string number) -> k]
-let digitalproduct number integers = List.map (fun x -> (number *x).ToString()) integers |> Seq.reduce (+)
 let ispandigital stringofdigits = (List.sort ([for j in (string stringofdigits) -> j])) = ['1';'2';'3';'4';'5';'6';'7';'8';'9']
 
+let concatenatedproduct number = 
+     (1,"") |> 
+        Seq.unfold (fun (x,numberasstring)-> 
+        let temp = numberasstring + (number*x).ToString()
+        Some(temp,(x+1,temp)))
+        |> Seq.find (fun x-> String.length(x) > 8)
 
-let ispandigitalproduct number = 
-    true
+let answer =
+    [1 .. 10000]
+    |> List.map concatenatedproduct
+    |> List.filter ispandigital
+    |> List.max 
 
-let answer = 
-    digits 987654321
-    |> permute
-    |> List.sort
-    |> List.rev
-    |> List.find ispandigitalproduct
 
+// SCRATCH SCRATCH SCRATCH SCRATCH SCRATCH SCRATCH SCRATCH SCRATCH SCRATCH SCRATCH
+// This function turns a charlist of digits to a number
 let rec digitstonumber (listofdigits : char list) = 
     match listofdigits with
     | [] -> 0
-    | head::tail -> (int (10. ** (float (List.length listofdigits) - 1.) * float (int (head) - 48)) + (float ( digitstonumber tail))
-
-
+    | head::tail -> int (10. ** (float (List.length listofdigits) - 1.) * float (int (head) - 48)) + (digitstonumber tail)
+// This function checks if an integer is pandigital
+let isintegerpandigital number = 
+    let rec loop = function
+        | 0 -> []
+        | x -> (x % 10)::(loop (x/10))
+    List.sort (loop number) = [1 .. 9]
