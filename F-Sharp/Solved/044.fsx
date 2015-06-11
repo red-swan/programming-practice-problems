@@ -11,8 +11,6 @@ and D = |Pk − Pj| is minimised; what is the value of D?*)
 
 let pentagonalnumbers = Seq.unfold (fun x-> Some(((3.0*x-1.0)*x)/2.0,x+1.0)) 1.0 |> Seq.cache
 
-
-
 let ispentagonal x = if x<1.0 then false else ((sqrt (24.0* x  + 1.0) + 1.0) / 6.0) % 1.0 = 0.0
 
 let checkforproperty (number : float) (listofnumbers : float list) = 
@@ -30,12 +28,14 @@ let rec checkforproperty2 thepentagonnumbers =
         let head = (List.head thepentagonnumbers)
         let tail = (List.tail thepentagonnumbers)
         let temp = checkforproperty head tail
-        if snd temp <> -1.0 then temp::checkforproperty2 tail else checkforproperty2 tail
+        if snd temp <> -1.0 then [temp] else checkforproperty2 tail
 
-
+let stopWatch = System.Diagnostics.Stopwatch.StartNew()
 let answer = 
     checkforproperty2 (pentagonalnumbers |> Seq.take 10000 |> Seq.toList)
     |> (fun [(a:float,b:float)] -> b-a)
+stopWatch.Stop()
+printfn "%f" stopWatch.Elapsed.TotalMilliseconds
 
 // Lessons learned
 // Recursion is fun
