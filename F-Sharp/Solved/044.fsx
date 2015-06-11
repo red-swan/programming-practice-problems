@@ -9,14 +9,45 @@ and D = |Pk − Pj| is minimised; what is the value of D?*)
 // 1. scan the sequence by the window and increase the window until you get a hit
 // 2. use floats
 
-
-
-
 let pentagonalnumbers = Seq.unfold (fun x-> Some(((3.0*x-1.0)*x)/2.0,x+1.0)) 1.0 |> Seq.cache
 
-let firstdifferences = Seq.unfold (fun x -> Some(3.0*x+1.0,x+1.0)) 1.0 |> Seq.cache
+
 
 let ispentagonal x = if x<1.0 then false else ((sqrt (24.0* x  + 1.0) + 1.0) / 6.0) % 1.0 = 0.0
+
+let checkforproperty (number : float) (listofnumbers : float list) = 
+    let rec checknumberagainstlist = function
+        | [] -> (number,-1.0)
+        | head::tail when tail=[] -> (number,-1.0)
+        | head::tail when number+head<(List.head tail) -> (number,-1.0)
+        | head::tail when (ispentagonal (number+head)  && ispentagonal (head-number)) -> (number,head)
+        | head::tail -> checknumberagainstlist tail
+    checknumberagainstlist listofnumbers
+
+let rec checkforproperty2 thepentagonnumbers = 
+    if List.length thepentagonnumbers < 2 then []
+    else
+        let head = (List.head thepentagonnumbers)
+        let tail = (List.tail thepentagonnumbers)
+        let temp = checkforproperty head tail
+        if snd temp <> -1.0 then temp::checkforproperty2 tail else checkforproperty2 tail
+
+
+let answer = 
+    checkforproperty2 (pentagonalnumbers |> Seq.take 10000 |> Seq.toList)
+    |> (fun [(a:float,b:float)] -> b-a)
+
+// Lessons learned
+// Recursion is fun
+// Recursion is a little confusing
+// The checkforproperty function is a little bit of a rickshaw
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+// SCRATCH SCRATCH SCRATCH SCRATCH SCRATCH SCRATCH SCRATCH SCRATCH SCRATCH SCRATCH SCRATCH SCRATCH SCRATCH 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+//let firstdifferences = Seq.unfold (fun x -> Some(3.0*x+1.0,x+1.0)) 1.0 |> Seq.cache
 
 let ndifference index n = ((index + n) * (3.0*(index + n ) - 1.0) / 2.0) - (index * (3.0*index - 1.0) / 2.0)
 
@@ -35,10 +66,44 @@ let getv x = (3.0*x*x-x)/2.0
 let getwindow x windowsize = [x-windowsize .. x+windowsize] |> List.map getv
 let getwindow value windowsize = [value-windowsize .. value+windowsize] |> List.filter ispentagonal |> List.filter (fun x-> x<> value)
 let hasproperty value windowsize = getwindow value windowsize |> List.filter (fun x->ispentagonal(value+x)) |> List.filter (fun x-> ispentagonal (x-value))
-// not working
-Seq.map2 hasproperty (pentagonalnumbers) (pentagonalnumbers) |> Seq.find (fun x-> Seq.isEmpty x |> not)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// trying to just find one that has the property
+let pentagonlist = pentagonalnumbers|>Seq.take 1000 |> Seq.toList
+let checkforproperty (listofnumbers : float list) (number : float) = 
+    let rec checknumberagainstlist = function
+        | [] -> (number,-1.0)
+        | head::tail when tail=[] -> (number,-1.0)
+        | head::tail when number+head<(List.head tail) -> (number,-1.0)
+        | head::tail when (ispentagonal (number+head)  )-> (number,head)//&& ispentagonal (head-number)) -> (number,head)
+        | head::tail -> checknumberagainstlist tail
+    checknumberagainstlist listofnumbers
+
+let rec checkforproperty2 thepentagonnumbers = 
+    match thepentagonnumbers with
+        | [] -> []
+        | head::tail when checkforproperty tail head |> snd <> -1.0 -> head :: checkforproperty2 tail
+        | head::tail -> checkforproperty2 tail
+    (*
+    let rec loop input = 
+        let temp = checkforproperty input (List.head input)
+        match temp with
+        | x when snd temp = -1.0 -> 
+        | x when snd temp <> -1.0 -> [temp]
+    loop thepentagonnumbers
+    // pass List.tail thepentagonnumbers
+    *)
+
+let numberswithproperty = 
+    pentagonlist
+    |> List.map (checkforproperty pentagonlist)
+    |> List.filter (fun (a,b) -> b <> -1.0)
+    |> List.filter (fun (a,b) -> a<>b)
+
+
+
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 let naturals = Seq.unfold (fun x-> Some(x,x+1.0)) 1.0 |> Seq.cache
@@ -69,10 +134,3 @@ Seq.init 10 (fun index -> index * index)
 let firstdifferences = pentagonalnumbers |> Seq.map ndifference
 // This returns a tuple value with the index jumped to and the difference away from sequence indices
 let difference (x,v) n = (x+n,((x + n) * (3*(x + n ) - 1) / 2) - (x * (3*x - 1) / 2))
-
-
-let getv n = (3.0*n*n-n) / 2.0
-
-let firstdifference i = ndifference i 1.0 |> ispentagonal
-
-Seq.find firstdifference pentagonalnumbers
