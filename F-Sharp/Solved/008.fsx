@@ -47,7 +47,7 @@ let numberinput =
     71636269561882670428252483600823257530420752963450"
 
 let numberasstring = numberinput.Replace("\n","").Replace(" ","")
-let getdigits number =  [for c in (string number) -> c] |> List.map (fun x -> (int x) - (int '0')) |> List.map (fun x -> float x)
+let getdigits number =  [for c in (string number) -> c] |> List.map (fun x -> float (string x))
 let cumprod listofnumbers = listofnumbers |> Seq.fold (fun acc elem -> acc * elem) 1.0
 
 let answer =
