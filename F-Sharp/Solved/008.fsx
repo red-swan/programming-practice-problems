@@ -46,12 +46,11 @@ let numberinput =
     05886116467109405077541002256983155200055935729725
     71636269561882670428252483600823257530420752963450"
 
-let numberasstring = numberinput.Replace("\n","").Replace(" ","")
-let getdigits number =  [for c in (string number) -> c] |> List.map (fun x -> float (string x))
+let getdigits numberasstring =  [for c in (string numberasstring) -> c] |> List.map (fun x -> float (string x))
 let cumprod listofnumbers = listofnumbers |> Seq.fold (fun acc elem -> acc * elem) 1.0
 
 let answer =
-    numberasstring
+    numberinput.Replace("\n","").Replace(" ","")
     |> getdigits
     |> Seq.windowed 13
     |> Seq.map cumprod
