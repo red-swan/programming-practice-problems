@@ -32,3 +32,7 @@ stopWatch.Stop()
 // printfn "%f" stopWatch.Elapsed.TotalSeconds
 // 1.124940
 // val it : unit = ()
+
+//  Learned
+// Use Seq instead of lists at the top and it will go through one at a time
+// This is WAAAAAY faster than using a list for the top level candidates
