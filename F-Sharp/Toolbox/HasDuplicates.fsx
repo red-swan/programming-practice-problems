@@ -67,12 +67,12 @@ let hasduplicates (inputlist : 'a list) =
 // Using dictionary
 let hasduplicates (inputlist : 'a list) =
     let dict = new Dictionary<_,_>()
-    let rec loop (something : 'a list) = 
-        if List.isEmpty something then false
-        elif dict.ContainsKey(List.head something) then true
+    let rec loop (listofthings : 'a list) = 
+        if List.isEmpty listofthings then false
+        elif dict.ContainsKey(List.head listofthings) then true
         else 
-            dict.Add(List.head something, 1) |> ignore
-            loop (List.tail something)
+            dict.Add(List.head listofthings, 1) |> ignore
+            loop (List.tail listofthings)
     loop inputlist
 
 (* hasduplicates ([1 .. 1000000]@[980397])
@@ -88,4 +88,15 @@ printfn "%f" stopWatch.Elapsed.TotalMilliseconds
 
 
 
+// Doesn't terminate
+
+let hasduplicates (inputlist : seq<'a>) =
+    let dict = new Dictionary<_,_>()
+    let rec loop (listofthings : seq<'a>) = 
+        if Seq.isEmpty listofthings then false
+        elif dict.ContainsKey(Seq.head listofthings) then true
+        else 
+            dict.Add(Seq.head listofthings, 0) |> ignore
+            loop (Seq.skip 1 listofthings)
+    loop inputlist
 
