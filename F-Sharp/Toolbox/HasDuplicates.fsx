@@ -64,6 +64,21 @@ let hasduplicates (inputlist : 'a list) =
 1351.568200
 *)
 
+// Using dictionary
+let hasduplicates (inputlist : 'a list) =
+    let dict = new Dictionary<_,_>()
+    let rec loop (something : 'a list) = 
+        if List.isEmpty something then false
+        elif dict.ContainsKey(List.head something) then true
+        else 
+            dict.Add(List.head something, 1) |> ignore
+            loop (List.tail something)
+    loop inputlist
+
+(* hasduplicates ([1 .. 1000000]@[980397])
+1036.464800
+*)
+
 
 // Running and timing
 let stopWatch = System.Diagnostics.Stopwatch.StartNew()
