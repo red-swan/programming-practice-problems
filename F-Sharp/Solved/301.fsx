@@ -17,6 +17,28 @@ For example X(1,2,3) = 0 because, no matter what the current player does, his op
 
 For how many positive integers n ≤ 2^30 does X(n,2n,3n) = 0 ?*)
 
+// memoized fib function using uint64
+let rec fib =
+    let dict = new System.Collections.Generic.Dictionary<_,_>()
+    fun n ->
+        match dict.TryGetValue(n) with
+        | true, v -> v
+        | false, _ -> 
+            let temp =
+                if n = 0UL then 0UL
+                elif n = 1UL then 1UL
+                else fib (n - 1UL) + fib(n - 2UL)
+            dict.Add(n, temp)
+            temp
+
+let answer = fib 32UL
+
+
+
+
+
+
+
 
 /// THIS IS ALL SCRATCH
 
