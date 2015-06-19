@@ -11,9 +11,7 @@ It turns out that the conjecture was false.
 
 What is the smallest odd composite that cannot be written as the sum of a prime and twice a square?*)
 
-// perhaps generate from primes and squares to get numbers ??
 
-open System.Numerics
 
 // Generates a list of all primes below limit
 let sieveOfAtkin limit =
@@ -47,67 +45,59 @@ let sieveOfAtkin limit =
         else acc
     2 :: 3 :: (generateList [] limit)
 
-///This implementation is based on the Miller-Rabin Haskell implementation 
-///from http://www.haskell.org/haskellwiki/Testing_primality
-let pow' mul sq x' n' = 
-    let rec f x n y = 
-        if n = 1I then
-            mul x y
-        else
-            let (q,r) = BigInteger.DivRem(n, 2I)
-            let x2 = sq x
-            if r = 0I then
-                f x2 q y
-            else
-                f x2 q (mul x y)
-    f x' n' 1I
-        
-let mulMod (a :bigint) b c = (b * c) % a
-let squareMod (a :bigint) b = (b * b) % a
-let powMod m = pow' (mulMod m) (squareMod m)
-let iterate f = Seq.unfold(fun x -> let fx = f x in Some(x,fx))
+let squares = Seq.unfold (fun n-> Some(n*n,n+1)) 1 |> Seq.cache
+let candidatesquares = Seq.map (fun x-> x*2) squares |> Seq.cache
+let primes = sieveOfAtkin 1000000
+let isprime x = 
+    let rec loop input = 
+        match input with
+        | [] -> false
+        | head::tail when head = x -> true
+        | head::tail -> loop tail
+    loop primes
 
-///See: http://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test
-let millerRabinPrimality n a =
-    let find2km n = 
-        let rec f k m = 
-            let (q,r) = BigInteger.DivRem(m, 2I)
-            if r = 1I then
-                (k,m)
-            else
-                f (k+1I) q
-        f 0I n
-    let n' = n - 1I
-    let iter = Seq.tryPick(fun x -> if x = 1I then Some(false) elif x = n' then Some(true) else None)
-    let (k,m) = find2km n'
-    let b0 = powMod n a m
+let primefactors n = 
+  let rec loop c p =
+    if c < (p * p) then [c]
+    elif c % p = 0UL then p :: (loop (c/p) p)
+    else loop c (p + 1UL)
+  loop n 2UL
 
-    match (a,n) with
-        | _ when a <= 1I && a >= n' -> 
-            failwith (sprintf "millerRabinPrimality: a out of range (%A for %A)" a n)
-        | _ when b0 = 1I || b0 = n' -> true
-        | _  -> b0 
-                 |> iterate (squareMod n) 
-                 |> Seq.take(int k)
-                 |> Seq.skip 1 
-                 |> iter 
-                 |> Option.exists id 
+let matchsome input = 
+    match input with
+        | Some x -> x
+        | None -> -1
 
-///For Miller-Rabin the witnesses need to be selected at random from the interval [2, n - 2]. 
-///More witnesses => better accuracy of the test.
-///Also, remember that if Miller-Rabin returns true, then the number is _probable_ prime. 
-///If it returns false the number is composite.
-let isPrimeW witnesses = function
-    | n when n < 2I -> false
-    | n when n = 2I -> true
-    | n when n = 3I -> true
-    | n when n % 2I = 0I -> false
-    | n             -> witnesses |> Seq.forall(millerRabinPrimality n)
+let findpair n = 
+    let candidateprimes = Seq.takeWhile (fun x-> x<n) primes |> Seq.toList |> List.rev
+    Seq.takeWhile (fun x-> x<n) candidatesquares 
+    |> Seq.map (fun x-> n-x) 
+    |> Seq.tryFind (fun x-> isprime x)
+    |> matchsome
+    |> fun x-> (n,x)
 
-let isPrime = isPrimeW (sieveOfAtkin 1000 |> List.map (fun x-> BigInteger x))
+let candidates = 
+    let rec loop x = seq{ 
+            if (isprime x |> not) then yield x; yield! loop (x+2)
+            else yield! loop (x+2) }
+    loop 3
+
+let answer = 
+    candidates
+    |> Seq.map findpair
+    |> Seq.find (fun (a,b) -> b = -1)
+    |> fun (a,b) -> a
 
 
-let odds = Seq.unfold (fun x -> Some(x,x+2I)) 33I
+
+
+// THIS IS SLOW BUT STEADY
+// LUCKY THAT THE NUMBER IS SO LOW
+
+
+
+
+
 
 
 
