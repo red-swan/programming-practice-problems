@@ -35,7 +35,11 @@ let answer = fib 32UL
 
 
 
-
+// Or by brute force
+let mutable count = 0
+for n in 1 .. int( 2.0**30.0) do
+    if n ^^^ 2*n ^^^ 3*n = 0 then count <- count + 1
+let answer = count
 
 
 
