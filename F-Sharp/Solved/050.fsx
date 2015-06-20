@@ -64,6 +64,8 @@ let searchsequence = [1 .. 600] |> List.rev
 let answer = 
     searchsequence
     |> Seq.tryFind (fun x->  (checkwindow x) |> matchsome |> (<>)0UL )
+    |> Option.get
+    |> checkwindow
 
 
 // THIS IS SLOW BUT WORKS, WHY 600? TOTAL GUESS AND CHECK
