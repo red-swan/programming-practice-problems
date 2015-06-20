@@ -7,9 +7,6 @@ The longest sum of consecutive primes below one-thousand that adds to a prime, c
 
 Which prime, below one-million, can be written as the sum of the most consecutive primes?*)
 
-
-// start with large windows and add up, the decrease the window size it seems
-
 // Generates a list of all primes below limit
 let sieveOfAtkin limit =
     // initialize the sieve
@@ -43,16 +40,31 @@ let sieveOfAtkin limit =
     2 :: 3 :: (generateList [] limit)
 
 
-let primes = sieveOfAtkin 1000000
+open System.Collections.Generic
+let primes = new Dictionary<uint64,uint64>()
+for i in (sieveOfAtkin 10000000) do
+    primes.Add(uint64 i, 0UL)
 
-let isprime x= Seq.exists ((=)x) primes
+let isprime x = primes.ContainsKey(x)
+
+let matchsome  = function
+    | Some x-> x
+    | None -> 0UL
+
+let candidates = sieveOfAtkin 1000000
+let checkwindow n = 
+    candidates
+    |> Seq.windowed n
+    |> Seq.map (fun x-> uint64 (Seq.sum x))
+    |> Seq.filter (fun x -> isprime x && x< 1000000UL)
+    |> (fun x-> if Seq.isEmpty x then None else Some(Seq.max x))
+
+let searchsequence = [1 .. 600] |> List.rev
+
+let answer = 
+    searchsequence
+    |> Seq.tryFind (fun x->  (checkwindow x) |> matchsome |> (<>)0UL )
 
 
-// cap number / 2 is a good limit to check
-let findlgconssum capnumber = 
-    let listofprimes = sieveOfAtkin capnumber
-    let windows n = Seq.windowed n listofprimes |> Seq.map (fun x-> (Array.sum x)) |> Seq.filter (fun x-> x<capnumber && isprime x)
-    let windowsizes = Seq.unfold (fun n -> if n = 1 then None else Some(windows n, n-1 )) capnumber
-    windowsizes |> Seq.take 1
-
+// THIS IS SLOW BUT WORKS, WHY 600? TOTAL GUESS AND CHECK
 
