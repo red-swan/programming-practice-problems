@@ -72,3 +72,8 @@ let foo l = l |> Seq.fold (fun (n,k,r) value ->
 
 
 let temp x = (1.0+x)/(1.0+x*x)
+
+// Best way to get seq of 1's and -1's
+let get1s n = 
+    let rec loop = seq { yield 1; yield 1; yield -1; yield -1; yield! loop}
+    loop |> Seq.take n
