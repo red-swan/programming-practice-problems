@@ -77,3 +77,41 @@ let temp x = (1.0+x)/(1.0+x*x)
 let get1s n = 
     let rec loop = seq { yield 1; yield 1; yield -1; yield -1; yield! loop}
     loop |> Seq.take n
+////////////////////////////////////////////////////////////////
+let pentagonalseq = 
+    Seq.unfold (fun n -> if n > 0 then Some((3*n*n-n)/2,-1*n) else Some((3*n*n-n)/2,1+ -1*n)) 1 
+    |> Seq.cache
+
+let getindexes n = 
+    Seq.takeWhile (fun x -> x<n) pentagonalseq
+    |> Seq.map (fun x-> n-x)
+    |> Seq.toList
+
+let get1s n = 
+    let rec loop = seq { yield 1; yield 1; yield -1; yield -1; yield! loop}
+    loop |> Seq.take n
+
+let rec pent =
+    let dict = new System.Collections.Generic.Dictionary<_,_>()
+    fun n ->
+        match dict.TryGetValue(n) with
+        | true, v -> v
+        | false, _ -> 
+            let temp = (3*n*n-n) / 2
+            dict.Add(n, temp)
+            temp 
+
+let integerpartitions = 
+    let dict = new System.Collections.Generic.Dictionary<_,_>()
+    fun n ->
+        match dict.TryGetValue(n) with
+        | true, v -> v
+        | false, _ -> 
+            let temp = getindexes(n) |> Seq.map pent |> Seq.map2 (fun x y -> x*y) (get1s n) |> Seq.sum
+            dict.Add(n, temp)
+            temp 
+
+// need to match indices right, but should work quickly
+
+
+[-10 .. 10] |> Seq.map pent |> Seq.toList |> List.sort
