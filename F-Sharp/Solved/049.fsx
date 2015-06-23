@@ -75,10 +75,16 @@ let answer =
     |> Seq.filter filteroutsmallgroups
     |> Seq.map (fun (a,b) -> (b |> Seq.toList |> find))
     |> Seq.filter (fun x-> x.IsSome)
-    |> Seq.toList
+    |> Seq.nth 1
+    |> (fun x-> x.Value |> (fun (a,b,c) -> string a + string b + string c))
 stopWatch.Stop()
 printfn "%f" stopWatch.Elapsed.TotalMilliseconds
 
-//  8.782200
-//  val answer : (int * int * int) option list =
-//   [Some (1487, 4817, 8147); Some (2969, 6299, 9629)]
+(*
+> 
+6.996400
+
+val stopWatch : Diagnostics.Stopwatch
+val answer : string = "296962999629"
+val it : unit = ()
+*)
