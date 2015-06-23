@@ -7,7 +7,10 @@ but there is one other 4-digit increasing sequence.
 
 What 12-digit number do you form by concatenating the three terms in this sequence?*)
 
-// Generates a list of all primes below limit
+// Used to create Hashset further below
+open System.Collections.Generic
+
+// Generates a list of all primes below a specified limit
 let sieveOfAtkin limit =
     // initialize the sieve
     let sieve = Array.create (limit + 1) false
@@ -39,16 +42,19 @@ let sieveOfAtkin limit =
         else acc
     2 :: 3 :: (generateList [] limit)
 
+// Get the list of all the primes we're interested in
 let candidates = sieveOfAtkin 10000 |> List.filter (fun x-> x>999)
 
+// This function will map a number into a sorted list of its digits
+// Useful for grouping all the numbers by their digits
 let rec digitgroups number = 
     let rec loop = function
     | 0 -> []
     | x -> (x % 10)::(loop (x/10))
     loop number |> List.sort
 
-open System
-open System.Collections.Generic
+//  This function takes a list of numbers and looks for any numbers that are twice/half of each other
+//  The function then returns the first of this pair and only of the first pair that was found
 let hasdoubles (inputlist : int list) =
     let hash = new HashSet<int>()
     let rec loop (something : int list) = 
@@ -59,6 +65,10 @@ let hasdoubles (inputlist : int list) =
             loop (List.tail something)
     loop inputlist
 
+//  Take a list of numbers and returns the first three to all have the same distance between them
+//  Returns None otherwise
+//  The mechanism here is that it subtracts the head from each element of the tail, and then uses the
+//  above hasdoubles function to see if any are twice/half of each other, those being the two in question
 let rec find (inputlist : int list) = 
     if inputlist = [] then None
     else
@@ -66,8 +76,10 @@ let rec find (inputlist : int list) =
         if search.IsSome then Some(inputlist.Head,inputlist.Head+search.Value,inputlist.Head+search.Value*2)
         else find inputlist.Tail
 
+//  Bool function built to test if the digit groups have more than 2 numbers that share digits
 let filteroutsmallgroups (input : int list * seq<int>) = input |> snd |> (fun x -> Seq.length x >2)
 
+//  Start the timer and run the optimzed algorithm
 let stopWatch = System.Diagnostics.Stopwatch.StartNew()
 let answer = 
     candidates
@@ -81,10 +93,6 @@ stopWatch.Stop()
 printfn "%f" stopWatch.Elapsed.TotalMilliseconds
 
 (*
-> 
-6.996400
-
-val stopWatch : Diagnostics.Stopwatch
-val answer : string = "296962999629"
-val it : unit = ()
+timer:
+9.123400
 *)
