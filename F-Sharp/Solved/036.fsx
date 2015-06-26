@@ -21,3 +21,57 @@ let answer =
 	|> List.filter (fun x-> dectobin x |> ispalindrome)
 	|> List.sum
 
+// // // // // // // // // // Working on optimized version
+
+// // // Imperative
+
+let mp2 n odd = 
+    let mutable mn,res = n,n
+    if odd then do mn <- (mn >>> 1)
+    while mn > 0 do
+        res <- (res <<< 1) + (mn &&& 1)
+        mn <- (mn >>> 1)
+    res
+
+let isPalindrome n bse = 
+    let mutable reversed,k = 0,n
+    while k > 0 do
+        reversed <- bse * reversed + k % bse
+        k <- k / bse
+    n=reversed
+
+
+// Calculation
+let countp limit = 
+    let mutable i,sum = 1,0
+    let mutable p = (mp2  i true)
+    while p < limit do
+        if isPalindrome p 10 then do sum <- sum + p
+        i <- i+1
+        p <- mp2 i true
+
+    i <- 1
+    p <- (mp2  i false)
+    while p < limit do
+        if isPalindrome p 10 then do sum <- sum + p
+        i <- i+1
+        p <- mp2 i false
+    sum
+
+// // // Functional
+
+let mp2 n odd = 
+    let mutable mn,res = n,n
+    if odd then do mn <- (mn >>> 1)
+    while mn > 0 do
+        res <- (res <<< 1) + (mn &&& 1)
+        mn <- (mn >>> 1)
+    res
+
+let mp2 n odd = 0
+open System
+Convert.ToInt32("101",10)
+
+let algo res mn = res <<< 1 + mn &&& 1
+let next mn = mn >>> 1
+
