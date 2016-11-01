@@ -7,7 +7,7 @@ open Tools
 open MathNet.Numerics
 open MathNet.Numerics.Random
 
-
+// SIMILAR TO 280
 let adjacentBoardPositions height width idx= 
     let horizontalMoves = 
         match idx with
