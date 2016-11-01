@@ -35,69 +35,66 @@ open System
 open System.IO
 open System.Text
 open Tools
+open System.Text.RegularExpressions
 
 
 // 97 to 122 is a to z
 //[0 .. 800] 
 //|> List.map (fun x -> (x,char x)) 
 //|> List.iter (fun (x,charx) -> printfn "%i: %A" x charx)
-
-
+module XORKey =
+    type T = XORKey of int []
+    let create (i: seq<int>) = 
+        if Seq.length i = 3
+        then XORKey (Seq.toArray i)
+        else failwith "XORKey must be of length 3"
+    let extractArray (i:T) = 
+        let (XORKey i') = i
+        i'
+    let asString i = 
+        i
+        |> extractArray
+        |> Array.map char
+        |> (fun aChars -> System.String.Concat(aChars))
 
 let secretMessage = 
-    File.ReadAllLines(@"C:\Users\JDKS\Desktop\ProjectEuler\p059_cipher.txt")
-    |> Array.item 0
+    File.ReadAllText(@"C:\Users\JDKS\Desktop\ProjectEuler\p059_cipher.txt")
     |> (fun x-> x.Split [|','|])
     |> Array.Parallel.map int
-
-let repeat length (input:'a list) = 
-    let rec loop = 
-        seq { yield input.[0]; yield input.[1]; yield input.[2]; yield! loop}
-    loop |> Seq.take length |> Seq.toArray
 
 
 let allPossibleKeys = 
     [97 .. 122]
-    |> combinations 3 
+    |> permutations 3 
     |> Seq.toArray
-    |> Array.Parallel.map 
-        (fun intList -> 
-        intList 
-        |> repeat 1201)
+    |> Array.Parallel.map (fun lst -> XORKey.create lst)
+
 //        |> (fun lChars -> System.String.Concat(Array.ofList(lChars))))
 //    |> Array.Parallel.map (fun x -> String.replicate 401 x)
 //    |> Array.Parallel.map (fun x -> x.[0..1200])
 
+let decryptToBytes message (withKey:XORKey.T) = 
+    withKey 
+    |> XORKey.extractArray
+    |> Seq.infiniteOf 
+    |> Seq.map2 (fun secret key -> secret ^^^ key) message
+    |> Seq.take (Seq.length message)
+    |> Seq.toArray
 
-
-let decryptToBytes withKey = 
-    Array.map2 (fun secret key -> secret ^^^ key) secretMessage withKey
-
-let decryptToString withKey = 
-    withKey
-    |> decryptToBytes
+let bytesToString input = 
+    input
     |> Array.Parallel.map (fun x -> char x)
     |> (fun lChars -> System.String.Concat(lChars))
 
-Array.iteri 
-    (fun i value -> printfn "%i ----------------\n%s" i (decryptToString value))
+let decryptToString message (withKey:XORKey.T) = 
+    withKey
+    |> decryptToBytes message
+    |> bytesToString
+
+
+let candidates = 
     allPossibleKeys
-
-
-
-
-
-
-///////////////
-let temp = 
-    [97 .. 122]
-    |> combinations 3 
-    |> Seq.toList
-//    |> Seq.filter (fun x -> x = [103;111;100])
-
-
-
-
-
-
-
+    |> Array.Parallel.map (fun x -> (x,decryptToBytes secretMessage x))
+    |> Array.Parallel.map (fun (key,decryptedBytes) -> 
+            (XORKey.asString key,Array.sum decryptedBytes,bytesToString decryptedBytes))
+    |> Array.filter (fun (key,bytes,str) -> Regex.Match(str," the ").Success)

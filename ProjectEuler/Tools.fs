@@ -181,3 +181,7 @@ let rec combinations n lst =
            let! z,r = findChoices lst
            let! zs = combinations (n-1) r 
            return z::zs }
+module Seq =
+    let infiniteOf repeatedList = 
+        Seq.initInfinite (fun _ -> repeatedList) 
+        |> Seq.concat
