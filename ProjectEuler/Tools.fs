@@ -1,5 +1,13 @@
 ﻿module Tools
 
+
+// how to use the stopwatch ----------------------------------------------------
+let stopWatch = System.Diagnostics.Stopwatch.StartNew()
+//...
+stopWatch.Stop()
+printfn "%f" stopWatch.Elapsed.TotalMilliseconds
+
+
 // Generates a list of all primes below limit ----------------------------------
 let sieveOfAtkin limit =
     // initialize the sieve
@@ -139,11 +147,6 @@ let indexList indices (s : 'a seq) =
                   yield e.Current
               | _ -> i := !i + 1 }
 
-// how to use the stopwatch ----------------------------------------------------
-let stopWatch = System.Diagnostics.Stopwatch.StartNew()
-//...
-stopWatch.Stop()
-printfn "%f" stopWatch.Elapsed.TotalMilliseconds
 
 
 // perm and comb ???????????????????????????????????????????????
@@ -181,7 +184,19 @@ let rec combinations n lst =
            let! z,r = findChoices lst
            let! zs = combinations (n-1) r 
            return z::zs }
+
+
+// create an infinite Sequence from any Ienumerable object ---------------------
 module Seq =
     let infiniteOf repeatedList = 
         Seq.initInfinite (fun _ -> repeatedList) 
         |> Seq.concat
+
+
+module List = 
+    let splice fstLst sndLst = 
+        let rec loop = function
+        | (xs,[]) -> xs
+        | ([], ys) -> ys
+        | (x::xs,y::ys) -> x :: y :: (loop (xs, ys))
+        loop (fstLst, sndLst)

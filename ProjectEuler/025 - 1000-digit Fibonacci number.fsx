@@ -25,5 +25,5 @@ What is the first term in the Fibonacci sequence to contain 1000 digits?
 
 let euler25 =
     let fibSeq = (0I, 1I) |> Seq.unfold (fun (a,b) -> Some( a+b, (b, a+b) ))
-    2 + (fibSeq |> Seq.findIndex (fun x -> x.ToString().Length = 1000))
+    fibSeq |> Seq.findIndex (fun x -> x.ToString().Length = 1000) |> ((+)2)
 
