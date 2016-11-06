@@ -35,4 +35,4 @@ let answer =
     loop 1010101030I
 
 stopWatch.Stop()
-printfn "%f" stopWatch.Elapsed.TotalSeconds
+printfn "%f" stopWatch.Elapsed.TotalSeconds // 7.129504
