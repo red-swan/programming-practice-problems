@@ -7,6 +7,7 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ProjectEuler", "ProjectEule
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Text Files", "Text Files", "{EFBDEF14-727A-4D84-B416-81EE4CD4A482}"
 	ProjectSection(SolutionItems) = preProject
+		p022_names.txt = p022_names.txt
 		p042_words.txt = p042_words.txt
 		p054_poker.txt = p054_poker.txt
 		p059_cipher.txt = p059_cipher.txt

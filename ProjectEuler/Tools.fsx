@@ -1,4 +1,12 @@
-﻿module Tools
+﻿#I @"C:\Users\JDKS\Applications\Github\Project-Euler-Solutions\packages\MathNet.Numerics.FSharp.3.13.1\lib\net40\"
+#I @"C:\Users\JDKS\Applications\Github\Project-Euler-Solutions\packages\MathNet.Numerics.3.13.1\lib\net40\"
+
+#r "MathNet.Numerics.dll"
+#r "MathNet.Numerics.FSharp.dll"
+
+open System
+open System.Numerics
+open MathNet.Numerics
 
 
 // how to use the stopwatch ----------------------------------------------------
@@ -6,6 +14,29 @@ let stopWatch = System.Diagnostics.Stopwatch.StartNew()
 //...
 stopWatch.Stop()
 printfn "%f" stopWatch.Elapsed.TotalMilliseconds
+
+// compute number of combinations of k elements from a set of n ----------------
+let choose(n:int) (k:int) = 
+    let n',k' = BigRational.FromInt(n),BigRational.FromInt(k)
+    Array.init k (fun i -> (n' - k' + BigRational.FromInt(i) + 1N) / (BigRational.FromInt(i) + 1N) )
+    |> Array.fold (fun acc elem -> acc*elem) 1N
+    |> BigRational.ToBigInt
+
+// memoize a function ----------------------------------------------------------
+let memoize f =
+    let dict = new System.Collections.Generic.Dictionary<_,_>()
+    fun n ->
+        match dict.TryGetValue(n) with
+        | (true, v) -> v
+        | _ ->
+            let temp = f(n)
+            dict.Add(n, temp)
+            temp
+
+// memoized factorial ----------------------------------------------------------
+let rec factorial = memoize(fun n -> 
+    if n = 0I then 1I
+    else (n-1I) |> factorial |> ((*)n))
 
 
 // Generates a list of all primes below limit ----------------------------------
@@ -61,7 +92,7 @@ let sieveOfAtkin limit =
 //let combinations size set = combinations' [] size set
 
 // Miller-Rabin Primality Check ------------------------------------------------
-open System.Numerics
+
 
 ///This implementation is based on the Miller-Rabin Haskell implementation 
 ///from http://www.haskell.org/haskellwiki/Testing_primality
@@ -77,7 +108,7 @@ let pow' mul sq x' n' =
             else
                 f x2 q (mul x y)
     f x' n' 1I
-        
+    
 let mulMod (a :bigint) b c = (b * c) % a
 let squareMod (a :bigint) b = (b * b) % a
 let powMod m = pow' (mulMod m) (squareMod m)
