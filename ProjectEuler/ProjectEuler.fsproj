@@ -70,10 +70,10 @@
     <None Include="015 - Lattice paths.fsx" />
     <None Include="016 - Power digit sum.fsx" />
     <None Include="u017 - Number letter counts.fsx" />
-    <None Include="u018 - Maximum path sum I.fsx" />
-    <None Include="u019 - Counting Sundays.fsx" />
+    <None Include="018 - Maximum path sum I.fsx" />
+    <None Include="019 - Counting Sundays.fsx" />
     <None Include="020 - Factorial digit sum.fsx" />
-    <None Include="u021 - Amicable numbers.fsx" />
+    <None Include="021 - Amicable numbers.fsx" />
     <None Include="022 - Names scores.fsx" />
     <None Include="u023 - Non-abundant sums.fsx" />
     <None Include="u024 - Lexicographic permutations.fsx" />
@@ -112,6 +112,8 @@
     <None Include="057 - Square root convergents.fsx" />
     <None Include="058 - Spiral Primes.fsx" />
     <None Include="059 - XOR Decryption.fsx" />
+    <None Include="u060 - Prime pair sets.fsx" />
+    <None Include="067 - Maximum path sum II.fsx" />
     <None Include="078 - Coin partitions.fsx" />
     <None Include="206 - Concealed Square.fsx" />
     <None Include="213 - Flea Circus.fsx" />

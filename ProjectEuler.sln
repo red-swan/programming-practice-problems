@@ -11,6 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Text Files", "Text Files", 
 		p042_words.txt = p042_words.txt
 		p054_poker.txt = p054_poker.txt
 		p059_cipher.txt = p059_cipher.txt
+		p067_triangle.txt = p067_triangle.txt
 	EndProjectSection
 EndProject
 Global

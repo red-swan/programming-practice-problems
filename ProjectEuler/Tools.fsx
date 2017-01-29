@@ -16,11 +16,31 @@ stopWatch.Stop()
 printfn "%f" stopWatch.Elapsed.TotalMilliseconds
 
 // compute number of combinations of k elements from a set of n ----------------
-let choose(n:int) (k:int) = 
-    let n',k' = BigRational.FromInt(n),BigRational.FromInt(k)
-    Array.init k (fun i -> (n' - k' + BigRational.FromInt(i) + 1N) / (BigRational.FromInt(i) + 1N) )
-    |> Array.fold (fun acc elem -> acc*elem) 1N
-    |> BigRational.ToBigInt
+let nextPascalRow pascalRow = 
+    [0I] @ pascalRow @ [0I]
+    |> List.pairwise
+    |> List.map (fun (a,b) -> a+b)
+
+let pascalRow n = 
+    let rec loop iteration pascalRow =  
+        match iteration with 
+        | value when value = n -> pascalRow
+        | _ -> pascalRow |> nextPascalRow |> loop (iteration + 1)
+    loop 1 [1I]
+
+let choose n k = 
+    (n+1)
+    |> pascalRow
+    |> List.item k
+
+
+
+
+//let choose(n:int) (k:int) = 
+//    let n',k' = BigRational.FromInt(n),BigRational.FromInt(k)
+//    Array.init k (fun i -> (n' - k' + BigRational.FromInt(i) + 1N) / (BigRational.FromInt(i) + 1N) )
+//    |> Array.fold (fun acc elem -> acc*elem) 1N
+//    |> BigRational.ToBigInt
 
 // memoize a function ----------------------------------------------------------
 let memoize f =
