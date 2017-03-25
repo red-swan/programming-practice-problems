@@ -69,7 +69,7 @@
     <None Include="014 - Longest Collatz sequence.fsx" />
     <None Include="015 - Lattice paths.fsx" />
     <None Include="016 - Power digit sum.fsx" />
-    <None Include="u017 - Number letter counts.fsx" />
+    <None Include="017 - Number letter counts.fsx" />
     <None Include="018 - Maximum path sum I.fsx" />
     <None Include="019 - Counting Sundays.fsx" />
     <None Include="020 - Factorial digit sum.fsx" />
