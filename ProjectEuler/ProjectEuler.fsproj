@@ -75,8 +75,8 @@
     <None Include="020 - Factorial digit sum.fsx" />
     <None Include="021 - Amicable numbers.fsx" />
     <None Include="022 - Names scores.fsx" />
-    <None Include="u023 - Non-abundant sums.fsx" />
-    <None Include="u024 - Lexicographic permutations.fsx" />
+    <None Include="023 - Non-abundant sums.fsx" />
+    <None Include="024 - Lexicographic permutations.fsx" />
     <None Include="025 - 1000-digit Fibonacci number.fsx" />
     <None Include="u026 - Reciprocal cycles.fsx" />
     <None Include="027 - Quadratic primes.fsx" />
