@@ -251,3 +251,18 @@ module List =
         | ([], ys) -> ys
         | (x::xs,y::ys) -> x :: y :: (loop (xs, ys))
         loop (fstLst, sndLst)
+    let removeFirst item lst =
+        let rec loop listRemainder listAccumulator = 
+            match listRemainder with
+            | [] -> listAccumulator
+            | head :: tail when head = item -> listAccumulator @ tail
+            | head :: tail -> loop tail (listAccumulator @ [head])
+        loop lst []
+    let drop n lst = 
+        if n > ((List.length lst) - 1) || n < 0 then failwith "drop index out of list bounds"
+        let rec loop step listRemainder listAccumulator = 
+            match listRemainder with
+            | [] -> listAccumulator
+            | head :: tail when step = n -> listAccumulator @ tail
+            | head :: tail -> loop (step + 1) (tail) (listAccumulator @ [head])
+        loop 0 lst []
