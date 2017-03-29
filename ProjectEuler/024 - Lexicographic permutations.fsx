@@ -80,15 +80,15 @@ let answer2 =
     FindNth 1000000 [0 .. 9]
 
 stopWatchCalculated.Stop()
-printfn "%f" stopWatchCalculated.Elapsed.TotalMilliseconds 
+printfn "%f" stopWatchCalculated.Elapsed.TotalMilliseconds
 // 2.8487 ms
 
 
 (*
 Takeaways:
 ----------
-- rather than sorting 3.6M permutations, we can construct the object of interest
-- permutations are numbered and the sorting tells us which ones we want
-- 
-
+- again, constructing the answer is faster than constucting all answers and 
+  searching for the right one
+- the ordering allows us to know which ones come next and 'seek ahead' to 
+  construct the answer
 *)
