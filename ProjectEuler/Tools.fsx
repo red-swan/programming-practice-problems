@@ -165,14 +165,16 @@ let millerRabinPrimality n a =
 ///Also, remember that if Miller-Rabin returns true, then the number is _probable_ prime. 
 ///If it returns false the number is composite.
 let isPrimeW witnesses = function
-    | n when n < 2I -> false
-    | n when n = 2I -> true
-    | n when n = 3I -> true
+    | n when n < 2I      -> false
+    | n when n = 2I 
+          || n = 3I 
+          || n = 5I
+          || n = 7I      -> true
     | n when n % 2I = 0I -> false
-    | n             -> witnesses |> Seq.forall(millerRabinPrimality n)
+    | n                  -> witnesses |> Seq.forall(millerRabinPrimality n)
 
-let isPrime = isPrimeW (sieveOfAtkin 1000 |> List.map (fun x-> BigInteger x))
-
+let isPrime = isPrimeW [2I; 3I; 5I; 7I]
+let isPrimeInt (integer:int) = isPrime (BigInteger(integer))
 
 // Greatest Common Divisor -----------------------------------------------------
 let rec gcd x y =

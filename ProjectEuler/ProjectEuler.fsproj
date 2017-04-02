@@ -103,7 +103,7 @@
     <None Include="048 - Self powers.fsx" />
     <None Include="049 - Prime permutations.fsx" />
     <None Include="050 - Consecutive prime sum.fsx" />
-    <None Include="u051 - Prime Digit Replacements.fsx" />
+    <None Include="051 - Prime Digit Replacements.fsx" />
     <None Include="052 -  Permuted multiples.fsx" />
     <None Include="053 - Combinatoric selections.fsx" />
     <None Include="u054 - Poker hands.fsx" />
