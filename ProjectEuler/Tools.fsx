@@ -160,6 +160,7 @@ let millerRabinPrimality n a =
                  |> iter 
                  |> Option.exists id 
 
+// +!+ TODO: Memoize this function
 ///For Miller-Rabin the witnesses need to be selected at random from the interval [2, n - 2]. 
 ///More witnesses => better accuracy of the test.
 ///Also, remember that if Miller-Rabin returns true, then the number is _probable_ prime. 
