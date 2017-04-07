@@ -112,9 +112,10 @@
     <None Include="057 - Square root convergents.fsx" />
     <None Include="058 - Spiral Primes.fsx" />
     <None Include="059 - XOR Decryption.fsx" />
-    <None Include="u060 - Prime pair sets.fsx" />
+    <None Include="060 - Prime pair sets.fsx" />
     <None Include="067 - Maximum path sum II.fsx" />
     <None Include="078 - Coin partitions.fsx" />
+    <None Include="102 - Triangle containment.fsx" />
     <None Include="206 - Concealed Square.fsx" />
     <None Include="213 - Flea Circus.fsx" />
     <None Include="280 - Ant and seeds.fsx" />

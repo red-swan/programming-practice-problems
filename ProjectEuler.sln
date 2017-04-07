@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ProjectEuler", "ProjectEuler\ProjectEuler.fsproj", "{E1203FC4-D85F-4634-8FD9-8974A626D862}"
 EndProject
@@ -12,6 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Text Files", "Text Files", 
 		p054_poker.txt = p054_poker.txt
 		p059_cipher.txt = p059_cipher.txt
 		p067_triangle.txt = p067_triangle.txt
+		p102_triangles.txt = p102_triangles.txt
 	EndProjectSection
 EndProject
 Global
