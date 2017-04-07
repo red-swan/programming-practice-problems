@@ -52,15 +52,40 @@ The file, poker.txt, contains one-thousand random hands dealt to two players. Ea
 
 How many hands does Player 1 win?
 *)
+open System.IO
 
+// type declarations -----------------------------------------------------------
+type Suit = | Clubs | Diamonds | Hearts | Spades
+type Rank = | Two | Three | Four | Five | Six | Seven
+            | Eight | Nine | Ten | Jack | Queen | King | Ace
+type Card = {Rank:Rank; Suit:Suit}
+type HandRank = 
+| HighCard of Rank | Pair of Rank | TwoPair of Rank*Rank 
+| ThreeOfAKind of Rank | Straight of Rank | Flush of Rank
+| FullHouse of Rank | FourOfAKind of Rank | StraightFlush of Rank
+type Hand = Card list
+type ShowDown = Hand list
+// parsing functions -----------------------------------------------------------
+let parseSuit = function
+|'C' -> Clubs  |'D' -> Diamonds 
+|'H' -> Hearts |'S' -> Spades
 
+let parseRank = function
+|'2' -> Two   |'3' -> Three |'4' -> Four 
+|'5' -> Five  |'6' -> Six   |'7' -> Seven
+|'8' -> Eight |'9' -> Nine  |'T' -> Ten 
+|'J' -> Jack  |'Q' -> Queen | 'K' -> King
+| 'A' -> Ace 
 
+let parseCard (cardStr : string) = 
+    {Rank = parseRank cardStr.[0];
+     Suit = parseSuit cardStr.[1]}
 
+let parseHand
 
-
-
-
-
-
-
-
+// computation of solution -----------------------------------------------------
+let answer = 
+    @"C:\Users\JDKS\Applications\Github\Project-Euler-Solutions\p054_poker.txt"
+    |> File.ReadAllLines
+    |> Array.map (fun (x:string) -> x.Split(' '))
+    |> Array.map (fun x -> Array.map parseCard x)
