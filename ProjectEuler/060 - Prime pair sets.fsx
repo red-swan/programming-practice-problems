@@ -105,13 +105,14 @@ let familySeeds =
     |> Set.filter (fun x -> x < 30UL)
     |> Set.map (fun x -> (set[x]))
 
+#time
 let answer = 
     [2 .. 5]
     |> List.fold (fun ans famTree -> introduceFamilyTreeToNewMemberSet primeSpace ans) familySeeds 
     |> Set.toList
     |> List.map (fun x -> (x |> Set.toList |> List.sum, x))
     |> List.minBy fst
-
+#time // 37.793 seconds
 ////////////////////////////////////////////////////////////////////////////////
 //                                 OPTIMIZATION                               //
 ////////////////////////////////////////////////////////////////////////////////
@@ -191,9 +192,11 @@ let familySeeds =
     |> Set.filter (fun x -> x < 30UL)
     |> Set.map (fun x -> (set[x]))
 
+#time 
 let answer = 
     [2 .. 5]
     |> List.fold (fun ans famTree -> introduceFamilyTreeToNewMemberSet primeSpace ans) familySeeds 
     |> Set.toList
     |> List.map (fun x -> (x |> Set.toList |> List.sum, x))
     |> List.minBy fst
+#time // 35.397 seconds
