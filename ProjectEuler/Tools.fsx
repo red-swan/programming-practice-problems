@@ -245,6 +245,17 @@ module Seq =
     let infiniteOf repeatedList = 
         Seq.initInfinite (fun _ -> repeatedList) 
         |> Seq.concat
+    let triplewise (source: seq<_>) =
+        seq { use e = source.GetEnumerator() 
+            if e.MoveNext() then
+                let i = ref e.Current
+                if e.MoveNext() then
+                    let j = ref e.Current
+                    while e.MoveNext() do
+                        let k = e.Current 
+                        yield (!i, !j, k)
+                        i := !j
+                        j := k }
 
 
 module List = 
