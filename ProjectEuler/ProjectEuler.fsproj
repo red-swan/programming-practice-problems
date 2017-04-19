@@ -115,9 +115,13 @@
     <None Include="060 - Prime pair sets.fsx" />
     <None Include="061 - Cyclical figurate numbers.fsx" />
     <None Include="062 - Cubic permutations.fsx" />
-    <None Include="u063 - Powerful digit counts.fsx" />
+    <None Include="063 - Powerful digit counts.fsx" />
+    <None Include="064 - Odd period square roots.fsx" />
+    <None Include="065 - Convergents of e.fsx" />
     <None Include="066 - Diophantine equation.fsx" />
     <None Include="067 - Maximum path sum II.fsx" />
+    <None Include="068 - Magic 5-gon ring.fsx" />
+    <None Include="u069 - Totient maximum.fsx" />
     <None Include="078 - Coin partitions.fsx" />
     <None Include="102 - Triangle containment.fsx" />
     <None Include="206 - Concealed Square.fsx" />
