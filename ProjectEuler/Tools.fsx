@@ -1,5 +1,5 @@
-﻿#I @"C:\Users\JDKS\Applications\Github\Project-Euler-Solutions\packages\MathNet.Numerics.FSharp.3.13.1\lib\net40\"
-#I @"C:\Users\JDKS\Applications\Github\Project-Euler-Solutions\packages\MathNet.Numerics.3.13.1\lib\net40\"
+﻿#I @"C:\Users\jdks\Github\Project-Euler-Solutions\packages\MathNet.Numerics.FSharp.3.13.1\lib\net40\"
+#I @"C:\Users\jdks\Github\Project-Euler-Solutions\packages\MathNet.Numerics.3.13.1\lib\net40\"
 
 #r "MathNet.Numerics.dll"
 #r "MathNet.Numerics.FSharp.dll"
