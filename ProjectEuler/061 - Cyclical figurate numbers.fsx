@@ -76,11 +76,60 @@ let answer =
 let isCyclicalPair num1 num2 = 
     (num1 / 100) = (num2 % 100)
 
-type SearchPath() = 
-    member this.Bind(m,f) = 
-    member this.Return(x) = x
 
-let search 
+
+
+/////////////////////////////
+// The Functional Way
+
+let polygonalGenerator s = 
+    Seq.initInfinite (fun idx -> ((pown (idx+1) 2) * (s-2) - (idx+1)*(s-4))/2)
+
+let polygonalCandidates s = 
+    s
+    |> polygonalGenerator
+    |> Seq.skipWhile (fun x -> x <= 999)
+    |> Seq.takeWhile (fun x -> x <= 9999)
+    |> Seq.cache
+
+module SolutionList = 
+    type T<'a> = SolutionList of 'a list
+
+    let isEmpty solution = 
+        match solution with
+        | SolutionList [] -> true
+        | _           -> false
+
+    let apply f ((SolutionList solution) : T<'a> ) = 
+        SolutionList (f solution)
+
+    let get solution = apply id solution
+
+    let create a = 
+        SolutionList a
+
+
+
+open SolutionList
+
+let attemptCandidate func (SolutionList solList)  (candidate : 'a) = 
+    match solList with
+    | [] -> SolutionList []
+    | head::tail -> if func candidate head 
+                    then SolutionList (candidate :: solList)
+                    else SolutionList []
+
+let seeds = 
+    [3 .. 8]
+    |> Seq.map polygonalCandidates
+    |>Seq.map (Seq.map (fun x -> SolutionList [x]))
+
+
+Seq.fil
+
+let applyToGroup func group = 
+    List.map (fun item -> List.removeFirst item group) group
+    |> List.map func 
 
 
 
