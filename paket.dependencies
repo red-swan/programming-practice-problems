@@ -1,0 +1,6 @@
+source https://www.nuget.org/api/v2
+
+nuget FParsec
+nuget MathNet.Numerics
+nuget MathNet.Numerics.FSharp
+nuget MathNet.Symbolics
