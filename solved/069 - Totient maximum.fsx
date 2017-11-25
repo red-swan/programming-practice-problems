@@ -27,6 +27,7 @@ Find the value of n ≤ 1,000,000 for which n/φ(n) is a maximum.
 
 #load "../support/PrimeNumbers.fs"
 open ProjectEuler
+open System.Numerics
 let primes = 
     1000 |> sieveOfAtkin |> List.map float
 let phi n =
@@ -45,3 +46,14 @@ let maximalTotients =
 
 let answer = 
     List.max maximalTotients
+
+
+let smallestPhi k = 
+    primes 
+    |> List.map BigInteger
+    |> List.windowed k
+    |> List.map (fun x -> List.reduce (*) x)
+    |> List.filter (fun x -> x < BigInteger(1e7))
+    |> List.rev
+
+smallestPhi 8
