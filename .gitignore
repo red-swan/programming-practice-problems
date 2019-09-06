@@ -9,6 +9,7 @@ Debug
 obj
 bin
 *.exe
+.ionide/
 
 
 ### Linux ###
