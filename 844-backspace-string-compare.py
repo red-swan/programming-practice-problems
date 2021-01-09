@@ -49,6 +49,19 @@ def backspaceCompare(S, T):
             si -= 1
             ti -= 1
 
+from itertools import zip_longest
+def backspaceCompare(S, T):
+    def F(S):
+        skip = 0
+        for x in reversed(S):
+            if x == '#':
+                skip += 1
+            elif skip:
+                skip -= 1
+            else:
+                yield x
+
+    return all(x == y for x, y in zip_longest(F(S), F(T)))
 
 backspaceCompare(s1,t1) # True
 backspaceCompare(s2,t2) # True
@@ -57,7 +70,7 @@ backspaceCompare(s4,t4) # False
 backspaceCompare(s5,t5) # False
 backspaceCompare(s6,t6) # True
 backspaceCompare(s7,t7) # True
-backspaceCompare(s8,t8) # False
+backspaceCompare(s8,t8) # True
 backspaceCompare(s9,t9) # True
 
 
