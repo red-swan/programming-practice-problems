@@ -1,14 +1,12 @@
+#string
+#generator
 
-s1,t1 = "ab#c", "ad#c"
-s2,t2 = "ab##", "c#d#"
-s3,t3 = "a##c", "#a#c"
-s4,t4 = "a#c", "b"
-s5,t5 = "a######", "a"
-s6,t6 = "a######", "a#"
-s7,t7 = "###", "#"
-s8,t8 = "bxj##tw", "bxo#j##tw"
-s9,t9 = "xywrrmp", "xywrrmu#p"
+# Given two strings S and T, return if they are equal when 
+# both are typed into empty text editors. # means a 
+# backspace character.
 
+# Note that after backspacing an empty text, 
+# the text will continue empty.
 
 def backspaceCompare(S, T):
     si = len(S) - 1
@@ -62,6 +60,18 @@ def backspaceCompare(S, T):
                 yield x
 
     return all(x == y for x, y in zip_longest(F(S), F(T)))
+
+
+
+s1,t1 = "ab#c", "ad#c"
+s2,t2 = "ab##", "c#d#"
+s3,t3 = "a##c", "#a#c"
+s4,t4 = "a#c", "b"
+s5,t5 = "a######", "a"
+s6,t6 = "a######", "a#"
+s7,t7 = "###", "#"
+s8,t8 = "bxj##tw", "bxo#j##tw"
+s9,t9 = "xywrrmp", "xywrrmu#p"
 
 backspaceCompare(s1,t1) # True
 backspaceCompare(s2,t2) # True

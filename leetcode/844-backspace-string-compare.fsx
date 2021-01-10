@@ -1,16 +1,16 @@
+(*
+#string
+#sequence-expression
+
+Given two strings S and T, return if they are equal when both 
+are typed into empty text editors. # means a backspace character.
+
+Note that after backspacing an empty text, the text will 
+continue empty.
+*)
+
 #time
 
-
-let sample1 = "ab#c", "ad#c"
-let sample2 = "ab##", "c#d#"
-let sample3 = "a##c", "#a#c"
-let sample4 = "a#c", "b"
-let sample5 = "a######", "a"
-let sample6 = "a######", "a#"
-let sample7 = "###", "#"
-let sample8 = "bxj##tw", "bxo#j##tw"
-let sample9 = "xywrrmp", "xywrrmu#p"
-let sample10 = "xp", "p"
 
 let f (s : string) = 
     let rec loop skip str = 
@@ -29,7 +29,16 @@ let backspaceCompare (s : string) (t : string) =
     ||> Seq.compareWith Operators.compare
     |> ((=)0)
 
-
+let sample1 = "ab#c", "ad#c"
+let sample2 = "ab##", "c#d#"
+let sample3 = "a##c", "#a#c"
+let sample4 = "a#c", "b"
+let sample5 = "a######", "a"
+let sample6 = "a######", "a#"
+let sample7 = "###", "#"
+let sample8 = "bxj##tw", "bxo#j##tw"
+let sample9 = "xywrrmp", "xywrrmu#p"
+let sample10 = "xp", "p"
 
 sample1 ||> backspaceCompare  // true
 sample2 ||> backspaceCompare  // true

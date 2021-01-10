@@ -1,3 +1,10 @@
+#array
+#shifting-pointer
+
+# Given n non-negative integers representing an elevation map
+# where the width of each bar is 1, compute how much water it 
+# can trap after raining.
+
 from itertools import accumulate
 
 sample0 = [0,1,0,2,1,0,3,1,0,1,2]
