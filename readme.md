@@ -1,15 +1,16 @@
-# Resources
-1. https://www.udemy.com/course/master-the-coding-interview-big-tech-faang-interviews/
-1. https://codeforces.com/
-1. https://www.interviewcake.com/
-1. https://interviewing.io/
-1. https://leetcode.com/
-1. https://www.youtube.com/channel/UCcH4Ga14Y4ELFKrEYM1vXCg/playlists
+# Solving Programming Problems
 
+## Resources
 
+1. <https://www.udemy.com/course/master-the-coding-interview-big-tech-faang-interviews/>
+1. <https://codeforces.com/>
+1. <https://www.interviewcake.com/>
+1. <https://interviewing.io/>
+1. <https://leetcode.com/>
+1. <https://www.youtube.com/channel/UCcH4Ga14Y4ELFKrEYM1vXCg/playlists>
 
+## Steps to work through problems
 
-# Steps to work through problems
 1. Verify constraints
 1. Write out some test cases
 1. Figure out a solution without code
