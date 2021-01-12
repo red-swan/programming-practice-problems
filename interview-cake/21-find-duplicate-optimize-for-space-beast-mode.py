@@ -18,11 +18,9 @@ def find_cycle_length(array, start_position):
 def find_first_in_cycle(array,cycle_length):
     position1 = array[len(array) - 1]
     position2 = walk_array(array, cycle_length, len(array))
-    step = 1
-    while position1 != position2 and step < 10:
+    while position1 != position2:
         position1 = array[position1 - 1]
         position2 = array[position2 - 1]
-        step += 1
     return position1
 
 def find_duplicate(array):
