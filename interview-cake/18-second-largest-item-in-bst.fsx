@@ -2,7 +2,7 @@
 
 type Node<'a> = 
     { Left : Node<'a> option; Value : 'a ; Right : Node<'a> option }
-
+let empty x = { Left = None; Value = x; Right = None}
 
 let getLargest bst = 
     let rec loop node = 
