@@ -7,6 +7,8 @@
 # Flatten the list so that all the nodes appear in a single-level, 
 # doubly linked list. You are given the head of the first level of the list.
 
+# 44 ms - 24.01%
+# 14.8 MB 0 52.72%
 
 # Definition for a Node.
 class Node:
@@ -64,40 +66,46 @@ class Node:
                 else: # we're done making the parent chain
                     building_lower_chain = True
                     previous_node = None
-
-
-    def _make_chain_no_child(self,gen):
-        cur_node = None
-        head = cur_node
-        prev_node = None
-        for item in gen:
-            cur_node = Node(item)
-            cur_node.prev = prev_node
-            if prev_node:
-                prev_node.next = cur_node
-        return head
-    def _insert_child(self,parent, child, at):
-        parent[at].child = child
-    def _make_chains(self, arr):
+    def level_items(self):
         output = []
-        first_level = []
-        i = 0
-        while True:
-            
-            if not arr[i]:
-                break
+        current_node = self
+        while current_node is not None:
+            output.append(current_node.val)
+            current_node = current_node.next
+        return output
 
-        first_level.append(arr[i])
-        output.append(first_level)
-        
-        self.val = output
 
 
 class Solution:
     def flatten(self, head: 'Node') -> 'Node':
-        pass
+        previous_node = None
+        current_node = head
+        next_nodes = []
+        while current_node is not None or next_nodes:
+            if current_node is None:
+                # there's a higher level to start stitching to
+                previous_node.next = next_nodes.pop()
+                current_node = previous_node.next
+                if current_node is not None:
+                    current_node.prev = previous_node
+            elif current_node.child is None:
+                # no child, we're just moving down the line
+                previous_node = current_node
+                current_node = current_node.next
+            else:
+                # found a child need to mark the next node
+                # and start inserting the children
+                next_nodes.append(current_node.next)
+                current_node.next = current_node.child
+                current_node.next.prev = current_node
+                current_node.child = None
+                previous_node = current_node
+                current_node = current_node.next
+        return head
 
-
+answer = Solution()
 sample1 = Node([1,2,3,4,5,6,None,None,None,7,8,9,10,None,None,11,12])
-sample1.val
+answer.flatten(sample1)
+sample1.level_items()
+
 

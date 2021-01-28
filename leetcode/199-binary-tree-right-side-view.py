@@ -4,6 +4,9 @@
 # 44ms - 9.37%
 # 14.4MB - 20.04%
 
+from collections import deque
+from collections import OrderedDict
+
 # Definition for a binary tree node.
 class TreeNode:
     def __init__(self, val=0, left=None, right=None):
@@ -15,14 +18,17 @@ class Solution:
     def rightSideView(self, root: TreeNode) -> list[int]:
         if root is None:
             return []
-        acc = []
-        def loop(tree, level, acc):
-            n = len(acc)
-            if n < level:
-                acc.append(tree.val)
-            if tree.right:
-                loop(tree.right, level + 1, acc)
-            if tree.left:
-                loop(tree.left, level + 1, acc)
-        loop(root, 1, acc)
-        return acc
+        queue = deque()
+        output = OrderedDict()
+        queue.append((root, 1))
+        while queue:
+            node,level = queue.popleft()
+            if node.left:
+                queue.append((node.left, level + 1))
+            if node.right:
+                queue.append((node.right,level + 1))
+            output[level] = node #
+        return [node.val for _,node in output.items()]
+
+
+
