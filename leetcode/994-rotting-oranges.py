@@ -12,39 +12,44 @@
 # 14.1MB - 97.25%
 
 class Solution:
-
     def orangesRotting(self, grid: list[list[int]]) -> int:
-        if not grid:
-            return 0
-        elif not grid[0]:
+        if not grid or not grid[0]:
             return 0
         else:
             m = len(grid)
             n = len(grid[0])
-        to_rot = [(r,c) for r in range(m) for c in range(n) if grid[r][c] == 2]
         i = 0
-
-        while to_rot:
-            while to_rot:
-                next_rot = []
-                while to_rot:
-                    r,c = to_rot.pop()
-                    for r,c in [(r-1,c),(r,c+1),(r+1,c),(r,c-1)]:
-                        if 0 <= r < m and 0<= c <n and grid[r][c] == 1:
-                            grid[r][c] = 0
-                            next_rot.append((r,c))
-            if next_rot:
-                to_rot = next_rot
-                i += 1
-
+        ones_count = 0
+        queue = []
+        
         for r in range(m):
             for c in range(n):
-                if grid[r][c] == 1:
-                    return -1
-        return i
+                v = grid[r][c]
+                if v == 2:
+                    queue.append((r,c))
+                elif v == 1:
+                    ones_count += 1
+                else:
+                    continue
 
-
-
+        coords_to_step_through = len(queue)
+        while queue:
+            if coords_to_step_through == 0:
+                coords_to_step_through = len(queue)
+                i += 1
+            while 0 < coords_to_step_through:
+                r,c = queue.pop(0)
+                coords_to_step_through -= 1
+                for r1,c1 in [(r-1,c),(r,c+1),(r+1,c),(r,c-1)]:
+                    if 0 <= r1 < m and 0<= c1 <n and grid[r1][c1] == 1:
+                        grid[r1][c1] = 2
+                        ones_count -= 1
+                        queue.append((r1,c1))
+        if ones_count == 0:
+            return i
+        else:
+            return -1
+      
 s1 = [
     [2,1,1,0,0],
     [1,1,1,0,0],
@@ -87,6 +92,5 @@ s7 = [
 s8 = [
     [0]
 ]
-
 
 [Solution().orangesRotting(grid) for grid in [s1,s2,s3,s4,s5,s6,s7,s8]]
