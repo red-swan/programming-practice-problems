@@ -9,7 +9,7 @@
 # Return the minimum number of minutes that must elapse until no cell has a fresh orange. If this is impossible, return -1.
 
 # 52ms - 70.34%
-# 14.1MB - 97.25%
+# 14.3MB - 39.99%
 
 class Solution:
     def orangesRotting(self, grid: list[list[int]]) -> int:
