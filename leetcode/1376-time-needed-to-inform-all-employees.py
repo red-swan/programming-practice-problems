@@ -16,32 +16,26 @@
 
 
 
-# 1940ms - 11.17%
-# 38.1 MB - 83.58%
+# 1404ms - 49.85%
+# 39.9 MB - 79.61%
 
 
 
 
 class Solution:
 
-    def buildAdjList(self,l,n):
-        output = [[] for _ in range(n)]
-        for i in range(n):
-            if 0 <= l[i]:
-                output[l[i]].append(i)
-        return output
-
-    def _dfs(self,i,employee_tree,inform_costs):
-        if not employee_tree[i]:
-            return 0
-        else:
-            cost = inform_costs[i]
-            return max([cost + self._dfs(employee,employee_tree,inform_costs) for employee in employee_tree[i]])
-
-
+    # this is clever
+    # for any node found, it runs up the tree and builds the values down to the input node
+    # marking the "completed" nodes by destroying the input
+    # lower nodes just work up until they find the higher completed node
+    # and works since the head node (the boss) is always complete
     def numOfMinutes(self, n: int, headID: int, manager: list[int], informTime: list[int]) -> int:
-        adjList = self.buildAdjList(manager,n)
-        return self._dfs(headID, adjList, informTime)
+        def dfs(i):
+            if manager[i] != -1:
+                informTime[i] += dfs(manager[i])
+                manager[i] = -1
+            return informTime[i]
+        return max(map(dfs, range(n)))
 
 
 
@@ -56,16 +50,14 @@ s3= (7,6,[1,2,3,4,5,6,-1],[0,6,5,4,3,2,1]) # 21
 s4 = (15,0,[-1,0,0,1,1,2,2,3,3,4,4,5,5,6,6],[1,1,1,1,1,1,1,0,0,0,0,0,0,0,0]) # 3
 s5 = (4,2, [3,3,-1,2],[0,0,162,914]) # 1076
 s6 = (8,4,[2,2,4,6,-1,4,4,5],[0,0,4,0,7,3,6,0]) #13
+s7 = (3,1,[1,-1,0],[3,5,0])
 
 [Solution().numOfMinutes(*s) for s in [s1,s2,s3,s4,s5,s6]]
 
 
 
 
-answer(s6)
-
-
-
+answer(s7)
 
 
 
