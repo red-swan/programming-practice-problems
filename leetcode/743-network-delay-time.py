@@ -9,7 +9,8 @@
 # impossible for all the n nodes to receive the signal, return -1.
 
 from math import inf
-from collections import deque
+import heapq
+from collections import defaultdict
 
 
 class Solution:
@@ -17,29 +18,46 @@ class Solution:
     # 476 ms - 59.27%
     # 16.3 MB - 30.69%
 
-    def networkDelayTime(self, times: list[list[int]], n: int, k: int) -> int:
-        travel_times = [inf] * n
-        travel_times[k-1] = 0
-        adjList = [[] for _ in range(n)]
-        for [u,v,w] in times:
-            adjList[u-1].append((v,w))
-
-        nodes_remaining = set(range(n))
-
-        while nodes_remaining:
-            node = min(nodes_remaining, key = travel_times.__getitem__) + 1
-            neighbors = adjList[node - 1]
-            for neighbor,cost in neighbors:
-                travel_times[neighbor - 1] = min(travel_times[neighbor - 1], travel_times[node - 1] + cost)
-            nodes_remaining.remove(node - 1)
-
-        output =  max(travel_times)
-        if output == inf:
-            return -1
-        else:
-            return output
-
+    # def networkDelayTime(self, times: list[list[int]], n: int, k: int) -> int:
+    #     travel_times = [inf] * n
+    #     travel_times[k-1] = 0
+    #     adjList = [[] for _ in range(n)]
+    #     for [u,v,w] in times:
+    #         adjList[u-1].append((v,w))
             
+    #     h = []
+    #     heappush(h,(0,k))
+
+    #     while h:
+    #         current_cost,node = heappop(h)
+    #         for neighbor,next_cost in adjList[node - 1]:
+    #             if current_cost + next_cost < travel_times[neighbor - 1]:
+    #                 travel_times[neighbor - 1] = travel_times[node-1] + next_cost
+    #                 heappush(h,(travel_times[neighbor - 1],neighbor))
+
+    #     output = max(travel_times)
+    #     if output == inf:
+    #         return -1
+    #     else:
+    #         return output
+
+    # use dijkstra's algorithm
+    def networkDelayTime(self, times, N, K):
+        graph = defaultdict(list)
+        for u, v, w in times:
+            graph[u].append((v, w))
+
+        pq = [(0, K)]
+        dist = {}
+        while pq:
+            d, node = heapq.heappop(pq)
+            if node in dist: continue
+            dist[node] = d
+            for nei, d2 in graph[node]:
+                if nei not in dist:
+                    heapq.heappush(pq, (d+d2, nei))
+
+        return max(dist.values()) if len(dist) == N else -1
         
 
 
@@ -50,12 +68,12 @@ s1 = ([[1,2,9],[1,4,2],[2,5,1],[4,2,4],[4,5,6],[3,2,3],[5,3,7],[3,1,5]],5,1)
 s2 = ([[2,1,1],[2,3,1],[3,4,1]],4,2) # 2
 s3 = ([[1,2,1]],2,1) # 1
 s4 = ([[1,2,1]],2,2) # -1
-all_samples = [s1,s2,s3,s4]
+s5 = ([[1,2,1],[2,3,2],[1,3,4]],3,1) # 3
+all_samples = [s1,s2,s3,s4,s5]
 
 def answer(t):
     return Solution().networkDelayTime(*t)
 
 
-
-answer(s1)
+# answer(s5)
 [answer(s) for s in all_samples]
