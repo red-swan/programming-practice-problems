@@ -100,3 +100,32 @@ def answer(t):
 
 # answer(s5)
 [answer(s) for s in all_samples]
+
+
+
+
+# recursive approach
+directions = [
+    (-2,-1),
+    (-2,1),
+    (-1,2),
+    (-1,-2),
+    (1,-2),
+    (1,2),
+    (2,-1),
+    (2,1)
+]
+
+def knightProbability(N,K,r,c):
+    if r < 0 or c < 0 or N <= r or N <= c:
+        return 0
+    if K == 0:
+        return 1
+    
+    res = 0
+    for dr,dc in directions:
+        res += knightProbability(N,K-1,r + dr, c + dc) / 8
+    return res
+
+
+knightProbability(8,8,4,4)
