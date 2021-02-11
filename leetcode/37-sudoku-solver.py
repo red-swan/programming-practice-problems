@@ -31,51 +31,74 @@ def board_to_string(board):
 def print_board(board):
     print(board_to_string(board))
 
-# 1728 ms - 5.01%
-# 14.6 MB - 27.26%
+# 276 ms - 56.52%
+# 14.4 MB - 74.38%
 class Solution:
     def __init__(self):
-        self.allOptions = set(map(str,range(1,10)))
-        self.boxCoords = {(i,j): list(it.product(self.boxNums(i),self.boxNums(j))) for i in [0,3,6] for j in [0,3,6]}
-    def boxNums(self,i):
-        m = 3*(i // 3)
-        return [m, m + 1, m + 2]
+        self.nums = list(map(str,range(1,10)))
+    def _getBoxId(self,row,col):
+        return 3*(row // 3) + (col // 3 )
+    def _isValid(self,box:set[str],row:set[str],col:set[str],num):
+        return num not in box and num not in row and num not in col
+    def solvBacktrack(self,board,boxes:list[set[str]],rows:list[set[str]],cols:list[set[str]],r,c):
+        if r == len(board) or c == len(board[0]):
+            return True
+        ### ### ###
+        if board[r][c] == '.':
+            for num in self.nums:
+                board[r][c] = num
+                box = boxes[self._getBoxId(r,c)]
+                row = rows[r]
+                col = cols[c]
 
-    def genBoxCoords(self,board,r,c):
-        return self.boxCoords[(3*(r//3), 3*(c//3))]
+                if self._isValid(box,row,col,num):
+                    box.add(num)
+                    row.add(num)
+                    col.add(num)
 
-    def genRowCoords(self,board,r,c):
-        return ((r,i) for i in range(9))
-    
-    def genColCoords(self,board,r,c):
-        return ((i,c) for i in range(9))
+                    if c == len(board[0]) - 1:
+                        if self.solvBacktrack(board,boxes, rows, cols, r + 1, 0):
+                            return True
+                    else:
+                        if self.solvBacktrack(board, boxes, rows, cols,r, c + 1):
+                            return True
+                    box.remove(num)
+                    row.remove(num)
+                    col.remove(num)
+                
+                board[r][c] = '.'
 
-    def genRelatedCoords(self,board,r,c):
-        return it.chain(self.genRowCoords(board,r,c), self.genColCoords(board,r,c), self.genBoxCoords(board,r,c))
+        else:
+            if c == len(board[0]) - 1:
+                if self.solvBacktrack(board,boxes, rows, cols, r + 1, 0):
+                    return True
+            else:
+                if self.solvBacktrack(board, boxes, rows, cols,r, c + 1):
+                    return True
+        return False
 
-    def genRelatedValues(self,board,r,c):
-        return (board[r][c] for r,c in self.genRelatedCoords(board,r,c))
-
-    def possible(self,board,row,col, num):
-        return num not in self.genRelatedValues(board, row, col)
 
     def solveSudoku(self, board: list[list[str]]) -> None:
         """
         Do not return anything, modify board in-place instead.
         """
+        n = len(board)
+        boxes = [set() for _ in range(n)]
+        rows  = [set() for _ in range(n)]
+        cols  = [set() for _ in range(n)]
+
+        for r in range(n):
+            for c in range(n):
+                if board[r][c] != '.':
+                    boxId = self._getBoxId(r,c)
+                    num = board[r][c]
+                    boxes[boxId].add(num)
+                    rows[r].add(num)
+                    cols[c].add(num)
+
+        self.solvBacktrack(board,boxes,rows,cols,0,0)
+
         
-        for row in range(9):
-            for col in range(9):
-                if board[row][col] == '.':
-                    for num in self.allOptions:
-                        if self.possible(board,row,col, num):
-                            board[row][col] = num
-                            if self.solveSudoku(board):
-                                return True
-                            else:
-                                board[row][col] = '.'
-                    return False
-        return True
         
 
 s1 = [["5","3",".",".","7",".",".",".","."],["6",".",".","1","9","5",".",".","."],[".","9","8",".",".",".",".","6","."],["8",".",".",".","6",".",".",".","3"],["4",".",".","8",".","3",".",".","1"],["7",".",".",".","2",".",".",".","6"],[".","6",".",".",".",".","2","8","."],[".",".",".","4","1","9",".",".","5"],[".",".",".",".","8",".",".","7","9"]]   
@@ -87,3 +110,13 @@ answer = Solution()
 answer.solveSudoku(board)
 print_board(board)
 
+def f(a,b,c,d):
+    return a+b+c+d
+
+f(1,*(2,3),4)
+
+asd = dict()
+asd = [dict() for _ in range(3)]
+
+asd[0]["hello"] = "there"
+asd[1]
