@@ -31,7 +31,8 @@ def board_to_string(board):
 def print_board(board):
     print(board_to_string(board))
 
-
+# 1728 ms - 5.01%
+# 14.6 MB - 27.26%
 class Solution:
     def __init__(self):
         self.allOptions = set(map(str,range(1,10)))
@@ -52,63 +53,29 @@ class Solution:
     def genRelatedCoords(self,board,r,c):
         return it.chain(self.genRowCoords(board,r,c), self.genColCoords(board,r,c), self.genBoxCoords(board,r,c))
 
-    def genAllEmptyCoords(self,board):
-        for r in range(9):
-            for c in range(9):
-                if board[r][c] == '.':
-                    yield (r,c)
+    def genRelatedValues(self,board,r,c):
+        return (board[r][c] for r,c in self.genRelatedCoords(board,r,c))
 
-    def getCandidates(self,board,r,c):
-        if board[r][c] == '.':
-            found = { board[r][c] for r,c in self.genRelatedCoords(board,r,c) if board[r][c] != '.'}
-            candidates = self.allOptions.difference(found)
-            return candidates
-        else:
-            return {}
-
-    def genAllCandidates(self,board):
-        for r,c in self.genAllEmptyCoords(board):
-            yield ((r,c),self.getCandidates(board,r,c))
-
-
-    def findCoordWithLeastCandidates(self,board):
-        smallest_candidate_count = 10
-        output = None
-        for ((r,c),candidates) in self.genAllCandidates(board):
-            if len(candidates) < smallest_candidate_count:
-                smallest_candidate_count = len(candidates)
-                output = ((r,c),candidates)
-            if len(candidates) < 2:
-                return output
-        return output
-
-    def loop(self, board,r,c,v):
-        # somehow we're not backtracking correctly
-        if (r,c) == (0,6):
-            print(board_to_string(board))
-        board[r][c] = v
-        
-        next_candidate = self.findCoordWithLeastCandidates(board)
-        if next_candidate is None:
-            return
-        (rnext,cnext),candidates = next_candidate
-        if len(candidates) == 0:
-            board[r][c] = '.'
-        else:
-            for candidate in candidates:
-                return self.loop(board,rnext,cnext,candidate)        
-        
+    def possible(self,board,row,col, num):
+        return num not in self.genRelatedValues(board, row, col)
 
     def solveSudoku(self, board: list[list[str]]) -> None:
         """
         Do not return anything, modify board in-place instead.
         """
-        print_board(board)
-        print("##################")
-        ((r,c),candidates) = self.findCoordWithLeastCandidates(board)
-        for candidate in candidates:
-            return self.loop(board,r,c, candidate)
-        print_board(board)
+        
+        for row in range(9):
+            for col in range(9):
+                if board[row][col] == '.':
+                    for num in self.allOptions:
+                        if self.possible(board,row,col, num):
+                            board[row][col] = num
+                            if self.solveSudoku(board):
+                                return True
+                            else:
+                                board[row][col] = '.'
+                    return False
+        return True
         
 
 s1 = [["5","3",".",".","7",".",".",".","."],["6",".",".","1","9","5",".",".","."],[".","9","8",".",".",".",".","6","."],["8",".",".",".","6",".",".",".","3"],["4",".",".","8",".","3",".",".","1"],["7",".",".",".","2",".",".",".","6"],[".","6",".",".",".",".","2","8","."],[".",".",".","4","1","9",".",".","5"],[".",".",".",".","8",".",".","7","9"]]   
@@ -118,61 +85,5 @@ board = s2
 
 answer = Solution()
 answer.solveSudoku(board)
-answer.findCoordWithLeastCandidates(board)
-answer.getCandidates(s2,6,2)
+print_board(board)
 
-list((s2[r][c] for r,c in answer.genBoxCoords(s2,6,2)))
-answer.genBoxCoords(s2,6,2)
-print_board(s2)
-print_board(s2Correct)
-
-answer.findCoordWithLeastCandidates(board)
-
-
-# def test(x,acc):
-#     acc.append(x)
-#     print(acc)
-#     s = sum(acc)
-#     if s == 7:
-#         return
-#     elif 7 < s:
-#         acc.pop()
-#     else:
-#         #  sum(acc) < 7:
-#         for i in [1000,100,1]:
-#             test(i,acc)
-                
-# acc = []
-# test(1,acc)
-# acc
-
-def f():
-    for x in range(10):
-        print(x)
-        return x
-
-f = (x for x in range(10))
-
-for a in f:
-    # a = next(f)
-    print(a)
-
-
-g = answer.genAllEmptyCoords(s1)
-list(g)
-
-
-def f():
-    def f1():
-        print("f1")
-    def f2():
-        print("f2")
-    def f3():
-        return 7
-    def f4():
-        print("f4")
-
-    for g in [f1,f2,f3,f4]:
-        return g()
-
-f()
