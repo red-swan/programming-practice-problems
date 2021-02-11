@@ -16,3 +16,8 @@
 ## A good article
 
 https://leetcode.com/discuss/general-discussion/458695/dynamic-programming-patterns
+
+
+## Backtracking
+1. https://repl.it/@ZhangMYihua/N-Queens#main.js
+1. https://repl.it/@ZhangMYihua/Palindrome-Partitioning#index.js
