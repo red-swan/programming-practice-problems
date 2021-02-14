@@ -58,7 +58,21 @@ module Grid =
             |> List.map (List.map toList >> String.concat " ")
             |> String.concat "\n"
         "\n" + output
+    let pruneCells (r : Row) : Row = 
+        let fixeds = BitArray(9,true)
+        
+        do
+            for c in r do
+                match c with 
+                | Fixed x -> fixeds.[x-1] <- false
+                | _ -> ()
+        
+        for c in r do
+            match c with
+            | Possible arr -> arr.And(fixeds) |> ignore
+            | _ -> ()
 
+        r
     
 
 
@@ -71,14 +85,6 @@ let sample1Grid = Grid.fromString sample1Str
 Grid.print sample1Grid
 Grid.printWithPossibilities sample1Grid
 
-
-sample1Grid |> List.map (List.map (function | Fixed _ -> 0 | Possible arr -> arr.Length))
-
-sample1Grid.[0].[2] |> toList
-
-let asd = '1'
-let zxc = int asd - 48
-char(zxc + 48)
 
 
 

@@ -43,39 +43,39 @@ class Solution:
     def solvBacktrack(self,board,boxes:list[set[str]],rows:list[set[str]],cols:list[set[str]],r,c):
         if r == len(board) or c == len(board[0]):
             return True
-        ### ### ###
-        if board[r][c] == '.':
-            for num in self.nums:
-                board[r][c] = num
-                box = boxes[self._getBoxId(r,c)]
-                row = rows[r]
-                col = cols[c]
-
-                if self._isValid(box,row,col,num):
-                    box.add(num)
-                    row.add(num)
-                    col.add(num)
-
-                    if c == len(board[0]) - 1:
-                        if self.solvBacktrack(board,boxes, rows, cols, r + 1, 0):
-                            return True
-                    else:
-                        if self.solvBacktrack(board, boxes, rows, cols,r, c + 1):
-                            return True
-                    box.remove(num)
-                    row.remove(num)
-                    col.remove(num)
-                
-                board[r][c] = '.'
-
         else:
-            if c == len(board[0]) - 1:
-                if self.solvBacktrack(board,boxes, rows, cols, r + 1, 0):
-                    return True
+            if board[r][c] == '.':
+                for num in self.nums:
+                    board[r][c] = num
+                    box = boxes[self._getBoxId(r,c)]
+                    row = rows[r]
+                    col = cols[c]
+
+                    if self._isValid(box,row,col,num):
+                        box.add(num)
+                        row.add(num)
+                        col.add(num)
+
+                        if c == len(board[0]) - 1:
+                            if self.solvBacktrack(board,boxes, rows, cols, r + 1, 0):
+                                return True
+                        else:
+                            if self.solvBacktrack(board, boxes, rows, cols,r, c + 1):
+                                return True
+                        box.remove(num)
+                        row.remove(num)
+                        col.remove(num)
+                    
+                    board[r][c] = '.'
+
             else:
-                if self.solvBacktrack(board, boxes, rows, cols,r, c + 1):
-                    return True
-        return False
+                if c == len(board[0]) - 1:
+                    if self.solvBacktrack(board,boxes, rows, cols, r + 1, 0):
+                        return True
+                else:
+                    if self.solvBacktrack(board, boxes, rows, cols,r, c + 1):
+                        return True
+            return False
 
 
     def solveSudoku(self, board: list[list[str]]) -> None:
