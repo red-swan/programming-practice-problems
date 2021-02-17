@@ -1,7 +1,3 @@
-
-#r "nuget: FSharpPlus"
-open FSharpPlus.Control
-
 #time
 
 let constant x _ = x
@@ -59,6 +55,12 @@ module Cell =
         | [] -> failwith "Cannot create empty Cell"
         | [x] -> Fixed x
         | _ -> Possible(Set.ofList l)
+    let tryOfSet s = 
+        match Set.count s with
+        | 0 -> None
+        | 1 -> Some(Fixed (Seq.head s))
+        | _ -> Some(Possible(s))
+
 
 type Row = Cell list
 
@@ -95,7 +97,7 @@ module Grid =
         |> String.concat "\n"
     let print g = 
         printfn "%s" (toString g)
-    
+
     let printWithPossibilities (g : Grid) = 
         let toList = function 
             | Fixed x -> (string x) + "          "
@@ -109,38 +111,15 @@ module Grid =
             g
             |> List.map (List.map toList >> String.concat " ")
             |> String.concat "\n"
-        "\n" + output
+        printfn "\n%s" output
 
-    let pruneCells (cells : Row) : Row option =
-        let pruneCell xs nums = 
-            let d = Set.difference xs nums
-            match Set.count d with 
-            | 0 -> None
-            | 1 -> Some(Fixed(Seq.head d))
-            | _ -> Some(Possible(d))
-        let fixeds = Seq.fold (fun s x -> match x with | Fixed(x) -> Set.add x s | _ -> s ) Set.empty cells
-        cells 
-        |> Seq.map (function | Possible xs -> pruneCell xs fixeds | x -> Some x)
-        |> Seq.fold (fun (acc : Cell seq option) (x : Cell option) -> 
-                match acc,x with
-                | Some acc, Some x -> Some(Seq.append acc [x])
-                | _,_ -> None
-            ) (Some(Seq.empty))
-        |> Option.map Seq.toList
-    let subGridToRows (cells : Grid) : Grid = 
-        cells
-        |> List.chunkBySize 3
-        |> List.collect (fun [r1;r2;r3] -> List.zip3 r1 r2 r3 |> List.chunkBySize 3)
-        |> List.map (List.unzip3 >> (fun (r1,r2,r3) -> List.concat [r1;r2;r3]))
-
-
-    let simplifyRow (r : Row) = 
+    let exclusivePossibilities (r : Row) = 
         r
         |> Seq.zip [1 .. 9]
         |> Seq.filter (snd >> Cell.isPossible)
         |> Seq.fold (fun acc (i, Possible xs) -> 
             Seq.fold (fun m x -> 
-                Map.addDefault [] (List.append) x [i] m
+                Map.addDefault [] List.append x [i] m
             
             ) acc xs
         
@@ -148,7 +127,80 @@ module Grid =
         |> Map.filter (fun k v -> List.length v < 4)
         |> Map.fold (fun m x is -> Map.addDefault [] List.append is [x] m) Map.empty
         |> Map.filter (fun k v -> List.length k = List.length v)
-        |> Map.elems
+        |> Map.fold (fun acc k v -> List.append [List.rev v] acc ) []
+        // |> Map.fold (fun acc _ v -> List.append (List.rev v) acc) []
+
+
+    let _pruneCellsByFixed (cells : Row) : Row option = 
+
+        let fixeds = Seq.fold (fun s x -> match x with | Fixed(x) -> Set.add x s | _ -> s ) Set.empty cells
+
+        cells
+        |> Seq.map ( function | Possible xs -> Cell.tryOfSet (Set.difference xs fixeds) | x -> Some x)
+        |> Seq.fold (fun (acc : Cell seq option) (x : Cell option) -> 
+                match acc,x with
+                | Some acc, Some x -> Some(Seq.append acc [x])
+                | _,_ -> None
+            ) (Some(Seq.empty))
+        |> Option.map Seq.toList
+    let rec pruneCellsByFixed cells =
+        match _pruneCellsByFixed cells with
+        | Some cells' when cells = cells' -> Some cells'
+        | Some cells' -> pruneCellsByFixed cells'
+        | None -> None
+
+    let _pruneCellsByExclusives (cells : Row) =
+        
+        match exclusivePossibilities cells with
+        | [] -> Some cells
+        | exclusives ->
+            let allExclusives = exclusives |> Seq.collect id |> Set.ofSeq
+            cells 
+            |> Seq.map (fun c -> 
+                match c with 
+                | Fixed _ -> Some c
+                | Possible xs -> 
+                    let intersection = Set.intersect xs allExclusives
+                    if List.contains (Set.toList intersection) exclusives then
+                        Cell.tryOfSet intersection
+                    else
+                        Some c
+                    )
+            |> Seq.fold (fun (acc : Cell seq option) (x : Cell option) -> 
+                match acc,x with
+                | Some acc, Some x -> Some(Seq.append acc [x])
+                | _,_ -> None
+            ) (Some(Seq.empty))
+            |> Option.map Seq.toList
+    let rec pruneCellsByExclusives cells = 
+        match _pruneCellsByExclusives cells with
+        | Some cells' when cells' = cells -> Some cells'
+        | Some cells' -> pruneCellsByExclusives cells'
+        | None -> None
+        
+        
+    let _pruneCells cells = 
+        maybe {
+            let! a = pruneCellsByFixed cells
+            let! b = pruneCellsByExclusives a
+            return b
+        }
+
+    let rec pruneCells (cells : Row) : Row option =
+        match _pruneCells cells with
+        | Some cells' when cells' = cells -> Some cells'
+        | Some cells' -> pruneCells cells'
+        | None -> None
+        
+        
+    let subGridToRows (cells : Grid) : Grid = 
+        cells
+        |> List.chunkBySize 3
+        |> List.collect (fun [r1;r2;r3] -> List.zip3 r1 r2 r3 |> List.chunkBySize 3)
+        |> List.map (List.unzip3 >> (fun (r1,r2,r3) -> List.concat [r1;r2;r3]))
+
+
+
         
         
 
@@ -225,49 +277,23 @@ module Grid =
                         yield! grid2 |> prune |> loop
             }
             
-        loop (Some g)
+        loop (prune g)
         |> Seq.head
 
     let solveFromString = fromString >> solve
 
 
 
-
-let s0str = "6......1.4.........2...........5.4.7..8...3....1.9....3..4..2...5.1........8.6..."
-let s1str = "53..7....6..195....98....6.8...6...34..8.3..17...2...6.6....28....419..5....8..79"
-let s2str = "..9748...7.........2.1.9.....7...24..64.1.59..98...3.....8.3.2.........6...2759.."
-let s3str = ".......1.4.........2...........5.4.7..8...3....1.9....3..4..2...5.1........8.6..."
-
-let board = s0str
-let grid = Grid.fromString board
-Grid.print grid
-Grid.printWithPossibilities grid
-
-
-let answer = Grid.solve grid 
-Grid.print answer
-
-
 let samples = 
     "in-depth/sudoku/sudoku17.txt"
     |> System.IO.File.ReadAllLines
-    |> Seq.take 10
+    |> Seq.take 1000    
 
-// 10 answers
-// 46.505 seconds
-// 4.65 seconds per answer
+// 1000 boards
+// 17.633 seconds
+// 0.017633 seconds per board
+fsi.ShowDeclarationValues <- false
 let answers = 
     samples 
-    |> Seq.map (Grid.fromString >> Grid.solve)
+    |> Seq.map Grid.solveFromString
     |> Seq.toList
-
-for i in answers do printfn "%s\n\n" (Grid.toString i)
-
-
-Grid.solveFromString s3str |> Grid.print
-
-
-
-let sRow = [Cell.ofList [4;6;9]; Fixed 1; Fixed 5; Cell.ofList [6;9]; Fixed 7; Cell.ofList [2;3;6;8;9]; Cell.ofList [6;9]; Cell.ofList [2;3;6;8;9]; Cell.ofList [2;3;6;8;9]]
-Grid.simplifyRow sRow
-
