@@ -25,12 +25,19 @@ module List =
         |> Seq.map fst
         |> Seq.contains true
 
-module Option = 
-    let apply f x = 
-        match f, x with 
-        | Some f, Some x -> Some(f x)
-        | _ -> None
-    let alternative a b = if Option.isNone a then b else a
+module Map = 
+    let addDefault (d : 'b) f (k : 'a) x (m : Map<'a,'b>) =
+        match Map.containsKey k m with
+        | true -> 
+            let xs = Map.find k m
+            Map.add k (f x xs) m
+        | false ->
+            Map.add k (f x d) m
+    let elems m = 
+        m
+        |> Map.toSeq
+        |> Seq.map snd
+        |> Seq.toList
 
 type MaybeBuilder() = 
     member this.Bind(x,f) = Option.bind f x
@@ -47,6 +54,11 @@ module Cell =
     let count = function 
         | Fixed _ -> 1
         | Possible s -> Set.count s
+    let ofList l = 
+        match l with
+        | [] -> failwith "Cannot create empty Cell"
+        | [x] -> Fixed x
+        | _ -> Possible(Set.ofList l)
 
 type Row = Cell list
 
@@ -120,6 +132,27 @@ module Grid =
         |> List.chunkBySize 3
         |> List.collect (fun [r1;r2;r3] -> List.zip3 r1 r2 r3 |> List.chunkBySize 3)
         |> List.map (List.unzip3 >> (fun (r1,r2,r3) -> List.concat [r1;r2;r3]))
+
+
+    let simplifyRow (r : Row) = 
+        r
+        |> Seq.zip [1 .. 9]
+        |> Seq.filter (snd >> Cell.isPossible)
+        |> Seq.fold (fun acc (i, Possible xs) -> 
+            Seq.fold (fun m x -> 
+                Map.addDefault [] (List.append) x [i] m
+            
+            ) acc xs
+        
+        ) Map.empty
+        |> Map.filter (fun k v -> List.length v < 4)
+        |> Map.fold (fun m x is -> Map.addDefault [] List.append is [x] m) Map.empty
+        |> Map.filter (fun k v -> List.length k = List.length v)
+        |> Map.elems
+        
+        
+
+
     let pruneGrid (g : Grid) : Grid option = 
         g 
         |> Seq.map pruneCells
@@ -195,6 +228,7 @@ module Grid =
         loop (Some g)
         |> Seq.head
 
+    let solveFromString = fromString >> solve
 
 
 
@@ -228,3 +262,12 @@ let answers =
     |> Seq.toList
 
 for i in answers do printfn "%s\n\n" (Grid.toString i)
+
+
+Grid.solveFromString s3str |> Grid.print
+
+
+
+let sRow = [Cell.ofList [4;6;9]; Fixed 1; Fixed 5; Cell.ofList [6;9]; Fixed 7; Cell.ofList [2;3;6;8;9]; Cell.ofList [6;9]; Cell.ofList [2;3;6;8;9]; Cell.ofList [2;3;6;8;9]]
+Grid.simplifyRow sRow
+
