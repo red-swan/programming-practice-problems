@@ -1,7 +1,7 @@
 #lang racket
 
 ; Globals -----------------------------------------------------------------------
-(define data-path "06-sample.txt")
+(define data-path "06.txt")
 
 ; Generic functions -------------------------------------------------------------
 (define (between x a b)
@@ -81,24 +81,35 @@
     (+ (abs (- y2 y1)) (abs (- x2 x1)))))
 
 ; like in-range, inclusive left, exclusive right
-(define (points-between p1 p2)
+(define (points-range p1 p2)
   (let ([x1 (posn-x p1)]
         [y1 (posn-y p1)]
         [x2 (posn-x p2)]
         [y2 (posn-y p2)])
     (cond
-      ; up/down
+      [(equal? p1 p2) (list p1)]
       [(equal? x1 x2)
-       (let ([ys (in-range (min y1 y2) (max y1 y2))])
-         (for/list ([y ys]) (posn x1 y)))]
+       (if (< y1 y2)
+           (for/list ([y (in-range y1 y2)])    (posn x1 y))
+           (for/list ([y (in-range y1 y2 -1)]) (posn x1 y)))]
       [(equal? y1 y2)
-       (let ([xs (in-range (min x1 x2) (max x1 x2))])
-         (for/list ([x xs]) (posn x y1)))]
+       (if (< x1 x2)
+           (for/list ([x (in-range x1 x2)])    (posn x y1))
+           (for/list ([x (in-range x1 x2 -1)]) (posn x y1)))]
       [else (error (format "points not in line: ~a ~a" p1 p2))])))
                
     
 
 ; Obstacle functions ------------------------------------------------------------
+
+(define (get-first-pos-after-boundary p dir bounds)
+  (let ([maxx1 (add1 (posn-x bounds))]
+        [maxy1 (add1 (posn-y bounds))])
+    (match dir
+      ['up    (posn (posn-x p) -1)]
+      ['down  (posn (posn-x p) maxy1)]
+      ['left  (posn -1 (posn-y p))]
+      ['right (posn maxx1 (posn-y p))])))
 
 (define (get-next-obstacle-pos p dir obstacles)
   (let ([facing (set-filter obstacles (curry headed-toward? p dir))])
@@ -110,36 +121,23 @@
           ['left  (set-argmax posn-x facing)]
           ['right (set-argmin posn-x facing)]))))
 
-(define (get-next-boundary-pos p dir bounds)
-  (match dir
-    ['up    (posn (posn-x p) -1)]
-    ['down  (posn (posn-x p) (add1 (posn-y bounds)))]
-    ['left  (posn -1 (posn-y p))]
-    ['right (posn (add1 (posn-x bounds)) (posn-y p))]))
+(define (get-next-stopping-point p dir bounds obstacles)
+  (let ([next-obs (get-next-obstacle-pos p dir obstacles)])
+    (if next-obs
+        (move next-obs (turn-around dir))
+        (get-first-pos-after-boundary p dir bounds))))
 
 
-(define (build-path p dir bounds obstacles [seen-obstacles (set)] [path-taken '()])
+(define (build-path p dir bounds obstacles [seen-stopping-points (set (list p dir))] [path-taken '()])
   (if (in-bounds p bounds)
-      (let ([next-obs (get-next-obstacle-pos p dir obstacles)])
-        (if next-obs
-            (let* ([opp-dir (turn-around dir)]
-                   [p* (move next-obs opp-dir)]
-                   [dir* (turn-right dir)]
-                   [points (points-between p p*)]
-                   [path-taken* (append points path-taken)])
-              (if (set-member? seen-obstacles (list next-obs dir))
-                  ; we're in a loop, let's add the first member as the last one and return
-                  path-taken
-                  ; we're still running around
-                  (build-path p*
-                              dir*
-                              bounds
-                              obstacles
-                              (set-add seen-obstacles (list next-obs dir))
-                              path-taken*)))
-            (let* ([boundary-pos (get-next-boundary-pos p dir bounds)]
-                   [points (points-between p boundary-pos)])
-              (append points path-taken))))
+      (let ([p* (get-next-stopping-point p dir bounds obstacles)]
+            [dir* (turn-right dir)])
+        (if (set-member? seen-stopping-points (list p* dir*))
+            (cons 'loop path-taken)
+            (let* ([path (reverse (points-range p p*))]
+                   [path-taken* (append path path-taken)]
+                   [seen-stopping-points* (set-add seen-stopping-points (list p* dir*))])
+              (build-path p* dir* bounds obstacles seen-stopping-points* path-taken*))))
       path-taken))
 
 
@@ -193,13 +191,18 @@
 (println (format "Part 1: ~a" (length setup-path)))
 
 ; Part 2 --------------------------------------------
-#|
-(define (ends-in-bounds? points)
-  (in-bounds (last points)))
 
-(let* ([original-obstacles (get-all-obstacles start 'up bounds obstacles)]
-       [path-definitions (visited-points start our-obstacles)]
-       [path-points (unique-points path-definitions)])
-  (for/list
-|#
-        
+(define (loops? points)
+  (equal? 'loop (first points)))
+
+(define new-obstacles
+  (for/fold ([acc '()])
+            ([candidate setup-path])
+    (let* ([obstacles* (set-add obstacles candidate)]
+           [new-path (build-path start 'up bounds obstacles*)])
+      (if (loops? new-path)
+          (cons candidate acc)
+          acc))))
+  
+(println (format "Part 2: ~a" (length new-obstacles)))
+      
