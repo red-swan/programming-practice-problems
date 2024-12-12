@@ -29,6 +29,14 @@
     [_  #:when (even-digits? x) (split-digits x)]
     [_ (list (* x 2024))]))
 
+; convert a list of stones to a mapping of their counts
+(define (stones->map stones)
+  (for/fold ([acc (hash)])
+            ([s stones])
+    (hash-update acc s add1 0)))
+
+; blink a stone-count mapping to the get the count mapping
+; for the next level
 (define (blink-map stone-map)
   ; blink each stone at the level we're at
   (for/fold ([stone-map* (hash)])
@@ -38,11 +46,9 @@
               ([num (blink stone)])
       (hash-update m num (add count) 0))))
 
+; function to count the stones after blinking n times
 (define (count stones n)
-         ; create the counts at the first level
-  (let* ([stone-map  (for/hash ([s stones]) (values s 1))]
-         ; continue down to the level of interest
-         [stone-mapN (for/fold ([acc stone-map]) [(x (in-range n))] (blink-map acc))])
+  (let* ([stone-mapN (for/fold ([acc (stones->map stones)]) [(x (in-range n))] (blink-map acc))])
     ; sum up the counts of all numbers
     (for/sum ([(stone count) (in-hash stone-mapN)]) count)))
 
