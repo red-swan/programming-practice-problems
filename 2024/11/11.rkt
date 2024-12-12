@@ -1,5 +1,5 @@
 #lang racket
-
+k
 ; returns the number of digits in a base 10 number
 (define (digits n)
   (add1 (exact-floor (log n 10))))
