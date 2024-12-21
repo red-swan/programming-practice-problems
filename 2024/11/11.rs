@@ -55,7 +55,7 @@ fn countLevel(stones: &Vec<u64>, n: u64) -> u64 {
 }
 
 fn main() {
-    println!("Hello, world!");
+
     let stones = vec![9694820, 93, 54276, 1304, 314, 664481, 0, 4];
     
     // Part 1
