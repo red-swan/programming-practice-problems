@@ -1,8 +1,20 @@
 #lang racket
 
-(require
-  relation/type
-  seq)
+
+; reading the data ----------------------------------------------------
+(define (split-pairs line)
+  (map string->number (regexp-match* #px"(\\d+)" line)))
+
+(define (transpose xss)
+  (apply map list xss))
+
+(define-values (lhs rhs)
+  (let* ([zipped-nums   (with-input-from-file "01.txt"
+                          (λ ()
+                            (for/list ([line (in-lines)])
+                              (split-pairs line))))])
+    (apply values (transpose zipped-nums))))
+
 
 ; function definitions ------------------------------------------------
 
@@ -13,33 +25,16 @@
               [y ys])
     (+ acc (abs (- y x)))))
 
+(define (build-counts xs)
+  (for/fold ([counts (hash)])
+            ([x xs])
+      (hash-update counts x add1 0)))
+
 (define (find-sim xs ys [acc 0])
-  ; if we're out of items, return the accumulator
-  (if (or (empty? xs) (empty? ys))
-      acc
-      ; otherwise, get the heads
-      (let* ([x (first xs)]
-             [y (first ys)])
-        (cond
-          ; if lhs is less, then skip it
-          [(< x y) (find-sim (rest xs) ys acc)]
-          ; if rhs is less, then skip it
-          [(< y x) (find-sim xs (rest ys) acc)]
-          ; if equal, move rhs down one
-          [else (find-sim xs (rest ys) (+ acc x))]))))
-
-(define (split-pairs line)
-  (map string->number (regexp-match* #px"(\\d+)" line)))    
-
-
-; reading the data ----------------------------------------------------
-(define-values (lhs rhs)
-  (let* ([zipped-nums (with-input-from-file "01.txt"
-                        (λ ()
-                          (for/list ([line (in-lines)])
-                            (split-pairs line))))]
-         [list-of-lists (map ->list (unzip zipped-nums))])
-    (apply values list-of-lists)))
+  (let ([yCounts (build-counts ys)])
+    (for/fold ([similarity 0])
+              ([x xs])
+      (+ similarity (* x (hash-ref yCounts x 0))))))
 
 
 ; computing the answers -----------------------------------------------

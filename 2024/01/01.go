@@ -47,24 +47,18 @@ func MeasureDifference(arr1, arr2 []int) uint {
 }
 
 func MeasureSimilarity(arr1, arr2 []int) int {
-	output := 0
-	i := 0
-	j := 0
-	for {
-		if i == len(arr1) || j == len(arr2) {
-			break
-		}
-		if arr1[i] < arr2[j] {
-			i++
-		} else if arr2[j] < arr1[i] {
-			j++
-		} else {
-			output += arr1[i]
-			j++
-		}
+	similarity := 0
+	rhsCounts := make(map[int]int)
+
+	for _, v := range arr2 {
+		rhsCounts[v] += 1
 	}
 
-	return output
+	for _, v := range arr1 {
+		similarity += v * rhsCounts[v]
+	}
+
+	return similarity
 }
 
 func ReadInput(path string) ([]int, []int) {

@@ -30,10 +30,9 @@ async function parseData(path) {
 
 
 async function main() {
-  let [lhs,rhs] = await parseData()
-  lhs.sort()
-  rhs.sort()
-  
+  let [lhs,rhs] = await parseData();
+  lhs.sort();
+  rhs.sort();
   
   // Part 1
   let difference = 0
@@ -46,17 +45,19 @@ async function main() {
 
 
   // Part 2
-  let similarity = 0;
-  let i = 0;
-  let j = 0;
-  while((i !== lhs.length) && (j !== rhs.length)){
-    if(lhs[i] < rhs[j]){
-      i++;
-    } else if(rhs[j] < lhs[i]){
-      j++;
+  let rhsCounts = new Map();
+  for(let n of rhs){
+    if(rhsCounts.has(n)){
+      rhsCounts.set(n, rhsCounts.get(n) + 1);
     } else {
-      similarity += lhs[i];
-      j++;
+      rhsCounts.set(n,1);
+    }
+  }
+
+  let similarity = 0;
+  for(let n of lhs){
+    if(rhsCounts.has(n)){
+      similarity += n * rhsCounts.get(n)
     }
   }
   console.log("Part 2: ", similarity)
