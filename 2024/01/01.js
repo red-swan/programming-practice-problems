@@ -7,7 +7,7 @@ const dataPath = '01.txt'
 
 // Functions ---------------------------
 async function parseData(path) {
-  const fileStream = fs.createReadStream(dataPath);
+  const fileStream = fs.createReadStream(path);
 
   const rl = readline.createInterface({
     input: fileStream,
@@ -30,7 +30,7 @@ async function parseData(path) {
 
 
 async function main() {
-  let [lhs,rhs] = await parseData();
+  let [lhs,rhs] = await parseData(dataPath);
   lhs.sort();
   rhs.sort();
   
