@@ -12,9 +12,9 @@ import (
 // Types -------------------------------------------------------------
 const (
 	North complex64 = -1
-	West  complex64 = -i
+	West  complex64 = -1i
 	South complex64 = 1
-	East  complex64 = i
+	East  complex64 = 1i
 )
 
 type Position = complex64
@@ -26,6 +26,10 @@ type Path struct {
 	heading Heading
 	score   uint
 	path    []complex64
+}
+
+func (p Path) String() string {
+	return fmt.Sprintf("Position: %v  Direction: %v  Score: %v PathLength: %v", p.heading.position, p.heading.direction, p.score, len(p.path))
 }
 
 type PathHeap []*Path
@@ -54,9 +58,9 @@ func (pq *PathHeap) Pop() any {
 }
 
 // Globals -----------------------------------------------------------
-var Directions = [4]int{North, South, West, East}
+var Directions = [4]complex64{North, South, West, East}
 
-const dataPath = "16-sample1.txt"
+const dataPath = "16.txt"
 
 // Functions ---------------------------------------------------------
 func parseData(path string) (map[Position]bool, Position, Position) {
@@ -88,102 +92,6 @@ func parseData(path string) (map[Position]bool, Position, Position) {
 	return maze, start, end
 }
 
-// func Move(p Position, d int) Position {
-// 	switch d {
-// 	case North:
-// 		return Position{x: p.x, y: p.y - 1}
-// 	case South:
-// 		return Position{x: p.x, y: p.y + 1}
-// 	case West:
-// 		return Position{x: p.x - 1, y: p.y}
-// 	case East:
-// 		return Position{x: p.x + 1, y: p.y}
-// 	default:
-// 		panic("Bad direction specified")
-// 	}
-// }
-
-// func turns(from, to int) uint {
-// 	if from == to {
-// 		return 0
-// 	} else if (from == North && to == South) ||
-// 		(from == South && to == North) ||
-// 		(from == West && to == East) ||
-// 		(from == East && to == West) {
-// 		return 2
-// 	} else {
-// 		return 1
-// 	}
-// }
-
-// func getMinScoreAt(p Position, s map[Heading]uint) (uint, bool) {
-// 	atLeastOneScoreRegistered := false
-// 	var outScore uint = 0
-
-// 	for dir := range Directions {
-// 		score, found := s[Heading{position: p, direction: dir}]
-// 		switch {
-// 		case found && !atLeastOneScoreRegistered:
-// 			outScore = score
-// 			atLeastOneScoreRegistered = true
-// 		case found:
-// 			outScore = min(score, outScore)
-// 		}
-// 	}
-// 	return outScore, atLeastOneScoreRegistered
-// }
-
-// func getPathChildren(p PathNode, walls map[Position]bool) []*PathNode {
-// 	var nextPaths []*PathNode
-// 	for _, dirNext := range Directions {
-// 		posNext := Move(p.heading.position, dirNext)
-// 		if !walls[posNext] {
-// 			nextPath := PathNode{}
-// 			nextPath.heading.position = posNext
-// 			nextPath.heading.direction = dirNext
-// 			nextPath.moves = p.moves + 1
-// 			nextPath.turns = p.turns + turns(p.heading.direction, dirNext)
-// 			nextPaths = append(nextPaths, &nextPath)
-// 		}
-// 	}
-// 	return nextPaths
-// }
-
-// func collectPaths(node *PathNode, path *Path, paths *[]Path, endPos Position, endScore uint) {
-// 	currPos := node.heading.position
-// 	*path = append(*path, currPos)
-// 	if currPos == endPos && score(*node) == endScore {
-// 		correctPath := make([]Position, len(*path))
-// 		copy(correctPath, *path)
-// 		*paths = append(*paths, correctPath)
-// 	} else {
-// 		for _, child := range node.children {
-// 			collectPaths(child, path, paths, endPos, endScore)
-// 		}
-// 	}
-// 	*path = (*path)[:len(*path)-1]
-// }
-
-// func getBestPathPositions(p *PathNode, endPos Position, endScore uint) uint {
-// 	var pathsToEnd [][]Position
-// 	var seenPositions = make(map[Position]bool)
-// 	var positionCount uint = 0
-// 	var tempPath Path = Path{}
-
-// 	collectPaths(p, &tempPath, &pathsToEnd, endPos, endScore)
-
-// 	for _, path := range pathsToEnd {
-// 		for _, pos := range path {
-// 			_, posSeen := seenPositions[pos]
-// 			if !posSeen {
-// 				positionCount++
-// 				seenPositions[pos] = true
-// 			}
-// 		}
-// 	}
-// 	return positionCount
-// }
-
 // Main --------------------------------
 func main() {
 	grid, start, end := parseData(dataPath)
@@ -191,10 +99,9 @@ func main() {
 	onPath := make(map[Position]bool)
 	scores := make(map[Heading]uint)
 	initialSearch := &Path{
-		pos:   start,
-		dir:   East,
-		score: 0,
-		path:  []complex64{start},
+		heading: Heading{position: start, direction: East},
+		score:   0,
+		path:    []complex64{start},
 	}
 	todo := make(PathHeap, 0)
 	heap.Push(&todo, initialSearch)
@@ -206,69 +113,52 @@ func main() {
 
 		currPath := heap.Pop(&todo).(*Path)
 
-		if scores[currPath.heading] < currPath.score {
+		// if we've seen this heading before and we're higher scoring now, skip it
+		previousHeadingScore, previouslyScored := scores[currPath.heading]
+		if (previouslyScored && previousHeadingScore < currPath.score) ||
+			(bestScore < currPath.score) {
 			continue
 		} else {
 			scores[currPath.heading] = currPath.score
 		}
-
+		// handle the case of being at the end
 		if currPath.heading.position == end && currPath.score <= bestScore {
 			bestScore = currPath.score
 			for _, pos := range currPath.path {
 				onPath[pos] = true
 			}
 		}
+
+		// build the next search nodes
 		type posScoreTuple struct {
-			pos   Position
+			dir   complex64
 			delta uint
 		}
-		for r, v := range []posScoreTuple{{1, 1}, {1i, 1001}, {-1i, 1001}} {
+
+		for _, next := range [3]posScoreTuple{
+			{dir: 1, delta: 1},
+			{dir: 1i, delta: 1001},
+			{dir: -1i, delta: 1001}} {
+
 			newPath := Path{}
-			newPath.heading.position
-		}
-
-		endScore, endScoreFound = getMinScoreAt(gameSetup.end, scores)
-		// if there's no new positions, we're done
-		if len(currentSearchNodes) == 0 {
-			break
-		}
-		// iterate through the positions we're at currently
-		for _, currentNode := range currentSearchNodes {
-			// get the score we're at currently
-			// get the next possible headings
-			currentNode.children = getPathChildren(*currentNode, gameSetup.walls)
-			// fmt.Println(currentHeading, "\t", nextPossibleHeadings)
-			// iterate through the next possible headings
-			for _, nextPossibleNode := range currentNode.children {
-				// score the heading
-				scoreNext := score(*nextPossibleNode)
-
-				previouslyRecordedScore, scoredAlready := scores[nextPossibleNode.heading]
-
-				scoredHigherThanEnd := endScoreFound && endScore < scoreNext
-				scoredHigherThanPrevious := scoredAlready && previouslyRecordedScore < scoreNext
-				if !(scoredHigherThanEnd || scoredHigherThanPrevious) {
-					scores[nextPossibleNode.heading] = scoreNext
-					nextSearchNodes = append(nextSearchNodes, nextPossibleNode)
-				}
+			newPath.score = currPath.score + next.delta
+			newPath.heading.direction = currPath.heading.direction * next.dir
+			newPath.heading.position = currPath.heading.position + newPath.heading.direction
+			if grid[newPath.heading.position] {
+				n := len(currPath.path)
+				newPositionList := make([]Position, n+1)
+				copy(newPositionList, currPath.path)
+				newPositionList[n] = newPath.heading.position
+				newPath.path = newPositionList
+				heap.Push(&todo, &newPath)
 			}
-
 		}
-		currentSearchNodes = nextSearchNodes
-		nextSearchNodes = []*PathNode{}
 	}
 
 	// Part 1
-
-	solution1, solution1Found := getMinScoreAt(gameSetup.end, scores)
-	if solution1Found {
-		fmt.Println("Part 1: ", solution1)
-	} else {
-		fmt.Println("Part1: No solution found")
-	}
+	fmt.Println("Part 1: ", bestScore)
 
 	// Part 2
-	solution2 := getBestPathPositions(&pathTree, gameSetup.end, solution1)
-	fmt.Println("Part 2: ", solution2)
+	fmt.Println("Part 2: ", len(onPath))
 
 }
