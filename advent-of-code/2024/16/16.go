@@ -28,12 +28,15 @@ type Path struct {
 	path    []complex64
 }
 
+type PathHeap []*Path
+
+// Functions ---------------------------------------------------------
+// pretty printing of Path type
 func (p Path) String() string {
 	return fmt.Sprintf("Position: %v  Direction: %v  Score: %v PathLength: %v", p.heading.position, p.heading.direction, p.score, len(p.path))
 }
 
-type PathHeap []*Path
-
+// heap.Interface ---
 func (ph PathHeap) Len() int { return len(ph) }
 func (ph PathHeap) Less(i, j int) bool {
 	return ph[i].score < ph[j].score
