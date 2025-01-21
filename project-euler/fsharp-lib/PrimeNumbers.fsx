@@ -1,4 +1,4 @@
-namespace ProjectEuler
+
 
 [<AutoOpen>]
 module PrimeNumbers = 

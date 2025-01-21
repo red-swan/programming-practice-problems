@@ -1,5 +1,3 @@
-namespace ProjectEuler
-
 [<AutoOpen>]
 module NumberTheory = 
     // Greatest Common Divisor -----------------------------------------------------

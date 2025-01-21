@@ -1,4 +1,3 @@
-namespace ProjectEuler
 
 // TODO
 // conform functions to Seq module type names ("'T" instead of "input")

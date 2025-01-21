@@ -1,4 +1,4 @@
-namespace ProjectEuler
+#load "HigherOrder.fsx"
 
 [<AutoOpen>]
 module Combinatorics =
