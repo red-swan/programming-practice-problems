@@ -77,9 +77,13 @@
               [(list x2 y2) pt2])
     (list (+ x1 x2) (+ y1 y2))))
 
+(define (hash-update-all ht updater)
+  (for/hash ([k (hash-keys ht)])
+    (values k (updater (hash-ref ht k)))))
+
 (define (pattern-at? word-search at pattern)
   (let* ([n (hash-count pattern)]
-         [pattern* (hash-map pattern (λ (key val) (add at val)))]
+         [pattern* (hash-update-all pattern (curry add at))]
          [found (hash-intersect word-search pattern*)])
     (= n (hash-count found))))
     
@@ -106,7 +110,16 @@
   (map (curryr build-word-pattern word) directions))
 
 
-(define asd (build-word-patterns "XMAS"))
+
+(define (count/word-search word-search patterns)
+  (for/fold ([occurrences 0])
+             ([pos (hash-keys word-search)])
+    (+ occurrences
+       (count identity (map (curry pattern-at? word-search pos) patterns)))))
+             
+
+             
+(count/word-search word-search (build-word-patterns "XMAS"))
 
 
 
