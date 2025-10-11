@@ -1,87 +1,16 @@
 #lang racket
 
-(require racket/hash)
 
-;   x ->->->
-; y 0,0  1,0
-;
-; | 0,1  1,1
-; v
-; | 0,2  1,2
-; v
+
+; Environment setup -------------------------------------------------------------
+(require racket/hash)
 
 (define DEV #f)
 (define input-path (make-parameter "04.txt"))
 (when DEV (input-path "04-sample.txt"))
 
-; build a mapping from coordinate to letter
-(define (build-search-mapping path)
-  (for/fold ([search (hash)]
-             [y 0]
-             #:result search)
-            ([line (file->lines path)])
-    (for/fold ([search search]
-               [x 0]
-               #:result (values search (add1 y)))
-              ([char (string->list line)])
-      (values
-       (hash-set search (list x y) char)
-       (add1 x)))))
 
-; Build directions and move from one to another
-(define directions '(N S E W NE NW SW SE))
-(define (step from dir)
-  (match-let ([(list x y) from])
-    (match dir
-      ['N  (list       x  (sub1 y))]
-      ['S  (list       x  (add1 y))]
-      ['E  (list (add1 x)       y)]
-      ['W  (list (sub1 x)       y)]
-      ['NW (list (sub1 x) (sub1 y))]
-      ['NE (list (add1 x) (sub1 y))]
-      ['SW (list (sub1 x) (add1 y))]
-      ['SE (list (add1 x) (add1 y))])))
-
-#|
-; Search for word at a location in a direction
-(define (has-word? word-search at word dir)
-  (cond
-    [(equal? word "") #t]
-    [(equal? (hash-ref word-search at #f) (string-ref word 0))
-     (has-word? word-search (step at dir) (substring word 1) dir)]
-    [else #f]))
-
-; Count all occurrences of a word at a location in all directions
-(define (count-occurrences-at word-search index word [dir #f])
-  (count identity (map (curry has-word? word-search index word) directions)))
-
-; Count all occurrences of the word in a word search
-(define (count-occurrences word-search word)
-  (for/fold ([count 0])
-            ([index (hash-keys word-search)])
-    (+ count (count-occurrences-at word-search index word))))
-|#
-; Read data -------------------------------------------------
-
-(define word-search (build-search-mapping (input-path)))
-    
-; Part 1 ----------------------------------------------------
-
-;(count-occurrences word-search "XMAS")
-
-
-
-; Scratch ---------------------------------------------------
-
-
-; Add x y coordinates stored as lists
-
-(define (add pt1 pt2)
-  (match-let ([(list x1 y1) pt1]
-              [(list x2 y2) pt2])
-    (list (+ x1 x2) (+ y1 y2))))
-
-; Hash functions
+; Hash Functions ----------------------------------------------------------------
 
 (define (hash-update-keys ht updater)
   (for/hash ([k (hash-keys ht)])
@@ -102,10 +31,60 @@
              (equal? (hash-ref ht key2)
                      (hash-ref ht2 key2)))
         still-subset?)))
-            
 
-; Building patterns for words in a direction
+(define (hash-has-same-key-value? ht1 ht2 key)
+  (and (hash-has-key? ht1)
+       (hash-has-key? ht2)
+       (equal? (hash-ref ht1 key)
+               (hash-ref ht2 key))))
 
+(define (hash-difference ht ht2)
+  (hash-filter ht
+               (λ (k v) (not
+                         (and
+                          (hash-has-key? ht2 k)
+                          (equal? v (hash-ref ht2 k)))))))
+
+; Coordinate Functions ----------------------------------------------------------
+
+;Add x y coordinates stored as lists
+(define (add pt1 pt2)
+  (match-let ([(list x1 y1) pt1]
+              [(list x2 y2) pt2])
+    (list (+ x1 x2) (+ y1 y2))))
+
+
+; Build directions and move from one to another
+(define directions '(N S E W NE NW SW SE))
+(define (step from dir)
+  (match-let ([(list x y) from])
+    (match dir
+      ['N  (list       x  (sub1 y))]
+      ['S  (list       x  (add1 y))]
+      ['E  (list (add1 x)       y)]
+      ['W  (list (sub1 x)       y)]
+      ['NW (list (sub1 x) (sub1 y))]
+      ['NE (list (add1 x) (sub1 y))]
+      ['SW (list (sub1 x) (add1 y))]
+      ['SE (list (add1 x) (add1 y))])))
+
+
+; Word Search Functions ---------------------------------------------------------
+; build a mapping from coordinate to letter
+(define (build-search-mapping path)
+  (for/fold ([search (hash)]
+             [y 0]
+             #:result search)
+            ([line (file->lines path)])
+    (for/fold ([search search]
+               [x 0]
+               #:result (values search (add1 y)))
+              ([char (string->list line)])
+      (values
+       (hash-set search (list x y) char)
+       (add1 x)))))
+
+; Build patterns for words in a direction
 (define (build-word-pattern dir word)
   (for/fold ([at (list 0 0)]
              [indices (hash)]
@@ -119,45 +98,49 @@
   (map (curryr build-word-pattern word) directions))
 
 
-
-
 ; Searching for patterns in a word search
-
 (define (pattern-at? word-search at pattern)
   (let* ([n (hash-count pattern)]
          [pattern* (hash-update-keys pattern (curry add at))]
          [found (hash-intersection word-search pattern*)])
     (= n (hash-count found))))
-    
-(define (find-occurrences word-search pattern)
-  (for/fold ([occurrences (set)])
-            ([at (hash-keys word-search)])
-    (let ([pattern* (hash-update-keys pattern (curry add at))])
+
+; 
+; returns the word search without the matching patterns
+(define (count-occurrences word-search pattern [with-patterns? #f])
+  (for/fold ([occurrences 0]
+             [found (set)]
+             #:result (if with-patterns? (values occurrences found) occurrences))
+            ([coordinate (hash-keys word-search)])
+    (let ([pattern* (hash-update-keys pattern (curry add coordinate))])
       
-    (if (hash-subset? word-search pattern*)
-        (set-add occurrences pattern*)
-        occurrences))))
-        
-(define (count-occurrences word-search patterns)
-  (set-count
-   (foldl set-union
-          (set)
-          (map (curry find-occurrences word-search) patterns))))
+      (if (hash-subset? word-search pattern*)
+          (values (add1 occurrences)
+                  (set-add found pattern*))
+          (values occurrences found)))))
+
+; patterns must not have duplicates
+(define (count-occurrences* word-search patterns)
+  (for/fold ([found (set)]
+             #:result (set-count found))
+            ([pattern patterns])
+    (let-values ([(occurrences new-found) (count-occurrences word-search pattern #t)])
+      (set-union found new-found))))
 
 
+; Computing Solutions ---------------------------------------
+; Read data -----------------------------
 
+(define word-search (build-search-mapping (input-path)))
+
+; Part 1 --------------------------------
 (define xmas-patterns (build-word-patterns "XMAS"))
-(count-occurrences word-search xmas-patterns)
+(count-occurrences* word-search xmas-patterns)
+
+; Part 2 --------------------------------
 
 
-
-
-
-
-
-
-
-
+; Scratch ---------------------------------------------------
 
 
 
