@@ -67,6 +67,16 @@
       ['NE (list (add1 x) (sub1 y))]
       ['SW (list (sub1 x) (add1 y))]
       ['SE (list (add1 x) (add1 y))])))
+(define (turn-around dir)
+  (match dir
+    ['N 'S]
+    ['S 'N]
+    ['E 'W]
+    ['W 'E]
+    ['NW 'SE]
+    ['SW 'NE]
+    ['SE 'NW]
+    ['NE 'SW]))
 
 
 ; Word Search Functions ---------------------------------------------------------
@@ -97,11 +107,6 @@
 (define (build-word-patterns word)
   (map (curryr build-word-pattern word) directions))
 
-; Build patterns for cross-mass
-(define (build-cross-pattern word a-dir a-coord b-dir b-coord)
-  (let ([a (build-word-pattern a-dir word a-coord)]
-        [b (build-word-pattern b-dir word b-coord)])
-    (hash-union a b #:combine (λ (a b) a))))
 
 ; Searching for patterns in a word search
 (define (pattern-at? word-search at pattern)
@@ -144,24 +149,38 @@
 ;(count-occurrences* word-search xmas-patterns)
 
 ; Part 2 --------------------------------
+;(define dirs-of-interest '((E  S) (SE SW) (S W) (SW NW) (W N) (NW NE) (N E) (NE SE)))
+(define dirs-of-interest '((SE SW) (SW NW) (NW NE) (NE SE)))
 (define cross-mass-patterns
-         (map (λ (l) (apply (curry build-cross-pattern "MAS") l))
-         '(
-           (S  (0 0) E  (-1  1))
-           (S  (0 0) W  ( 1  1))
-           (N  (0 0) E  (-1 -1))
-           (N  (0 0) W  ( 1 -1))
-           (SE (0 0) NE ( 0  2))
-           (SE (0 0) SW ( 2  0))
-           (NE (0 0) NW ( 2  0))
-           (SW (0 0) NW ( 0  2))
-           )))
+  (let* ([dirs-of-interest  '((E  S) (SE SW) (S W) (SW NW) (W N) (NW NE) (N E) (NE SE))]
+         [f (λ (dir) (build-word-pattern (turn-around dir) "MAS" (step (list 0 0) dir)))]
+         [g (λ (dirs) (apply hash-union (map f dirs) #:combine (λ (a b) a)))])
+    (map g dirs-of-interest)))
+        
 
-(count-occurrences* word-search cross-mass-patterns)
+(for/fold ([occurrences 0])
+          ([coordinate (hash-keys word-search)])
+  (let ([has-x-mas?
+         (λ (coordinate)
+           (λ (dirs)
+             (match-let ([(list dir1 dir2) dirs])
+               (and
+                (equal? #\M (hash-ref word-search (step coordinate dir1) #f))
+                (equal? #\M (hash-ref word-search (step coordinate dir2) #f))
+                (equal? #\S (hash-ref word-search (step coordinate (turn-around dir1)) #f))
+                (equal? #\S (hash-ref word-search (step coordinate (turn-around dir2)) #f))))))])
+                       
+    (if (equal? (hash-ref word-search coordinate) #\A)
+        (+ occurrences
+           (count (has-x-mas? coordinate) dirs-of-interest))
+        occurrences)))
+           
+
+;(count-occurrences* word-search cross-mass-patterns #t)
 
 ; 1279 too low
 ; answer
-; 2052 too high
+; 2047 too high
 ; Scratch ---------------------------------------------------
 
 ;(define asd (set->list (count-occurrences* word-search cross-mass-patterns #t)))
