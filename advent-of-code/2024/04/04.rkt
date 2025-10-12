@@ -5,7 +5,7 @@
 ; Environment setup -------------------------------------------------------------
 (require racket/hash)
 
-(define DEV #t)
+(define DEV #f)
 (define input-path (make-parameter "04.txt"))
 (when DEV (input-path "04-sample.txt"))
 
@@ -154,16 +154,23 @@
            (SE (0 0) NE ( 0  2))
            (SE (0 0) SW ( 2  0))
            (NE (0 0) NW ( 2  0))
-           (SW (0 0) NW ( 0 -2))
+           (SW (0 0) NW ( 0  2))
            )))
 
-(define asd (set->list (count-occurrences* word-search cross-mass-patterns #t)))
-; 1279 too low
-; Scratch ---------------------------------------------------
-(define sdf
-(map (curryr hash-filter (λ (k v) (equal? v #\M))) asd)
-)
+(count-occurrences* word-search cross-mass-patterns)
 
+; 1279 too low
+; answer
+; 2052 too high
+; Scratch ---------------------------------------------------
+
+;(define asd (set->list (count-occurrences* word-search cross-mass-patterns #t)))
+
+;(define sdf (map (curryr hash-filter (λ (k v) (equal? v #\M))) asd))
+
+;(define zxc (eighth cross-mass-patterns))
+
+;(build-word-pattern 'NW "MAS" (list 0 -2))
 #|
 08 28
 28 48
