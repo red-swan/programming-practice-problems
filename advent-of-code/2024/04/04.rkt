@@ -115,7 +115,6 @@
          [found (hash-intersection word-search pattern*)])
     (= n (hash-count found))))
 
-; 
 ; returns the word search without the matching patterns
 (define (count-occurrences word-search pattern [with-patterns? #f])
   (for/fold ([occurrences 0]
@@ -140,69 +139,22 @@
 
 
 ; Computing Solutions ---------------------------------------
-; Read data -----------------------------
 
+; Read data -----------------------------
 (define word-search (build-search-mapping (input-path)))
 
 ; Part 1 --------------------------------
 (define xmas-patterns (build-word-patterns "XMAS"))
-;(count-occurrences* word-search xmas-patterns)
+(count-occurrences* word-search xmas-patterns)
 
 ; Part 2 --------------------------------
-;(define dirs-of-interest '((E  S) (SE SW) (S W) (SW NW) (W N) (NW NE) (N E) (NE SE)))
-(define dirs-of-interest '((SE SW) (SW NW) (NW NE) (NE SE)))
 (define cross-mass-patterns
-  (let* ([dirs-of-interest  '((E  S) (SE SW) (S W) (SW NW) (W N) (NW NE) (N E) (NE SE))]
+  (let* ([dirs-of-interest  '((SE SW) (SW NW) (NW NE) (NE SE))]
          [f (λ (dir) (build-word-pattern (turn-around dir) "MAS" (step (list 0 0) dir)))]
          [g (λ (dirs) (apply hash-union (map f dirs) #:combine (λ (a b) a)))])
     (map g dirs-of-interest)))
         
-
-(for/fold ([occurrences 0])
-          ([coordinate (hash-keys word-search)])
-  (let ([has-x-mas?
-         (λ (coordinate)
-           (λ (dirs)
-             (match-let ([(list dir1 dir2) dirs])
-               (and
-                (equal? #\M (hash-ref word-search (step coordinate dir1) #f))
-                (equal? #\M (hash-ref word-search (step coordinate dir2) #f))
-                (equal? #\S (hash-ref word-search (step coordinate (turn-around dir1)) #f))
-                (equal? #\S (hash-ref word-search (step coordinate (turn-around dir2)) #f))))))])
-                       
-    (if (equal? (hash-ref word-search coordinate) #\A)
-        (+ occurrences
-           (count (has-x-mas? coordinate) dirs-of-interest))
-        occurrences)))
-           
-
-;(count-occurrences* word-search cross-mass-patterns #t)
-
-; 1279 too low
-; answer
-; 2047 too high
-; Scratch ---------------------------------------------------
-
-;(define asd (set->list (count-occurrences* word-search cross-mass-patterns #t)))
-
-;(define sdf (map (curryr hash-filter (λ (k v) (equal? v #\M))) asd))
-
-;(define zxc (eighth cross-mass-patterns))
-
-;(build-word-pattern 'NW "MAS" (list 0 -2))
-#|
-08 28
-28 48
-48 68
-68 88
-
-10 12
-63 83
-12 14
-51 71
-
-|#
-
+(count-occurrences* word-search cross-mass-patterns)
 
 
 
