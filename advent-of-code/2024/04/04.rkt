@@ -5,7 +5,7 @@
 ; Environment setup -------------------------------------------------------------
 (require racket/hash)
 
-(define DEV #f)
+(define DEV #t)
 (define input-path (make-parameter "04.txt"))
 (when DEV (input-path "04-sample.txt"))
 
@@ -85,8 +85,8 @@
        (add1 x)))))
 
 ; Build patterns for words in a direction
-(define (build-word-pattern dir word)
-  (for/fold ([at (list 0 0)]
+(define (build-word-pattern dir word [start (list 0 0)])
+  (for/fold ([at start]
              [indices (hash)]
              #:result indices)
             ([char (string->list word)])
@@ -97,6 +97,11 @@
 (define (build-word-patterns word)
   (map (curryr build-word-pattern word) directions))
 
+; Build patterns for cross-mass
+(define (build-cross-pattern word a-dir a-coord b-dir b-coord)
+  (let ([a (build-word-pattern a-dir word a-coord)]
+        [b (build-word-pattern b-dir word b-coord)])
+    (hash-union a b #:combine (λ (a b) a))))
 
 ; Searching for patterns in a word search
 (define (pattern-at? word-search at pattern)
@@ -120,9 +125,10 @@
           (values occurrences found)))))
 
 ; patterns must not have duplicates
-(define (count-occurrences* word-search patterns)
+(define (count-occurrences* word-search patterns [return-found? #f])
   (for/fold ([found (set)]
-             #:result (set-count found))
+             #:result
+             (if return-found? found (set-count found)))
             ([pattern patterns])
     (let-values ([(occurrences new-found) (count-occurrences word-search pattern #t)])
       (set-union found new-found))))
@@ -135,15 +141,41 @@
 
 ; Part 1 --------------------------------
 (define xmas-patterns (build-word-patterns "XMAS"))
-(count-occurrences* word-search xmas-patterns)
+;(count-occurrences* word-search xmas-patterns)
 
 ; Part 2 --------------------------------
+(define cross-mass-patterns
+         (map (λ (l) (apply (curry build-cross-pattern "MAS") l))
+         '(
+           (S  (0 0) E  (-1  1))
+           (S  (0 0) W  ( 1  1))
+           (N  (0 0) E  (-1 -1))
+           (N  (0 0) W  ( 1 -1))
+           (SE (0 0) NE ( 0  2))
+           (SE (0 0) SW ( 2  0))
+           (NE (0 0) NW ( 2  0))
+           (SW (0 0) NW ( 0 -2))
+           )))
 
-
+(define asd (set->list (count-occurrences* word-search cross-mass-patterns #t)))
+; 1279 too low
 ; Scratch ---------------------------------------------------
+(define sdf
+(map (curryr hash-filter (λ (k v) (equal? v #\M))) asd)
+)
 
+#|
+08 28
+28 48
+48 68
+68 88
 
+10 12
+63 83
+12 14
+51 71
 
+|#
 
 
 
