@@ -109,34 +109,35 @@
 
 
 ; Searching for patterns in a word search
-(define (pattern-at? word-search at pattern)
-  (let* ([n (hash-count pattern)]
-         [pattern* (hash-update-keys pattern (curry add at))]
-         [found (hash-intersection word-search pattern*)])
-    (= n (hash-count found))))
+(define (hash-equal-at? ht1 ht2 key)
+  (and
+   (hash-has-key? ht1 key)
+   (hash-has-key? ht2 key)
+   (equal? (hash-ref ht1 key) (hash-ref ht2 key))))
 
-; returns the word search without the matching patterns
-(define (count-occurrences word-search pattern [with-patterns? #f])
-  (for/fold ([occurrences 0]
-             [found (set)]
-             #:result (if with-patterns? (values occurrences found) occurrences))
+(define (has-pattern-at? word-search at pattern)
+  (for/fold ([errored? #f]
+             #:result (not errored?))
+            ([coordinate (hash-keys pattern)])
+      (if errored?
+          errored?
+          (let ([coordinate* (add at coordinate)])
+            (not
+             (and
+              (hash-has-key? word-search coordinate*)
+              (equal?
+               (hash-ref word-search coordinate*)
+               (hash-ref pattern coordinate))))))))
+
+(define (count-patterns-at word-search at patterns)
+  (count (curry has-pattern-at? word-search at) patterns))
+
+(define (count-occurrences word-search counter)
+  (for/fold ([occurrences 0])
             ([coordinate (hash-keys word-search)])
-    (let ([pattern* (hash-update-keys pattern (curry add coordinate))])
-      
-      (if (hash-subset? word-search pattern*)
-          (values (add1 occurrences)
-                  (set-add found pattern*))
-          (values occurrences found)))))
-
-; patterns must not have duplicates
-(define (count-occurrences* word-search patterns [return-found? #f])
-  (for/fold ([found (set)]
-             #:result
-             (if return-found? found (set-count found)))
-            ([pattern patterns])
-    (let-values ([(occurrences new-found) (count-occurrences word-search pattern #t)])
-      (set-union found new-found))))
-
+    (let* ([letter (hash-ref word-search coordinate)]
+           [count (counter word-search coordinate letter)])
+      (+ occurrences count))))
 
 ; Computing Solutions ---------------------------------------
 
@@ -145,19 +146,31 @@
 
 ; Part 1 --------------------------------
 (define xmas-patterns (build-word-patterns "XMAS"))
-(count-occurrences* word-search xmas-patterns)
+  
+(define (count-xmas-patterns word-search coordinate letter)
+  (if (equal? letter #\X)
+      (count-patterns-at word-search coordinate xmas-patterns)
+      0))
+
+(count-occurrences word-search count-xmas-patterns)
 
 ; Part 2 --------------------------------
+
 (define cross-mass-patterns
   (let* ([dirs-of-interest  '((SE SW) (SW NW) (NW NE) (NE SE))]
          [f (λ (dir) (build-word-pattern (turn-around dir) "MAS" (step (list 0 0) dir)))]
          [g (λ (dirs) (apply hash-union (map f dirs) #:combine (λ (a b) a)))])
     (map g dirs-of-interest)))
-        
-(count-occurrences* word-search cross-mass-patterns)
+
+(define (count-cross-mass-patterns word-search coordinate letter)
+  (if (equal? letter #\A)
+      (count-patterns-at word-search coordinate cross-mass-patterns)
+      0))
+  
+(count-occurrences word-search count-cross-mass-patterns)
 
 
 
 
-
+; Scratch ---------------------------
 
