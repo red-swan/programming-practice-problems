@@ -12,38 +12,12 @@
 
 ; Hash Functions ----------------------------------------------------------------
 
-(define (hash-update-keys ht updater)
-  (for/hash ([k (hash-keys ht)])
-    (values (updater k) (hash-ref ht k))))
+(define (hash-equal-at? ht1 ht2 key)
+  (and
+   (hash-has-key? ht1 key)
+   (hash-has-key? ht2 key)
+   (equal? (hash-ref ht1 key) (hash-ref ht2 key))))
 
-(define (hash-intersection ht1 ht2)
-  (for/hash ([key1 (hash-keys ht1)]
-             #:when (and (hash-has-key? ht2 key1)
-                     (equal? (hash-ref ht1 key1)
-                             (hash-ref ht2 key1))))
-    (values key1 (hash-ref ht1 key1))))
-
-(define (hash-subset? ht ht2)
-  (for/fold ([still-subset? #t])
-            ([key2 (hash-keys ht2)])
-    (if still-subset?
-        (and (hash-has-key? ht key2)
-             (equal? (hash-ref ht key2)
-                     (hash-ref ht2 key2)))
-        still-subset?)))
-
-(define (hash-has-same-key-value? ht1 ht2 key)
-  (and (hash-has-key? ht1)
-       (hash-has-key? ht2)
-       (equal? (hash-ref ht1 key)
-               (hash-ref ht2 key))))
-
-(define (hash-difference ht ht2)
-  (hash-filter ht
-               (λ (k v) (not
-                         (and
-                          (hash-has-key? ht2 k)
-                          (equal? v (hash-ref ht2 k)))))))
 
 ; Coordinate Functions ----------------------------------------------------------
 
@@ -56,6 +30,7 @@
 
 ; Build directions and move from one to another
 (define directions '(N S E W NE NW SW SE))
+
 (define (step from dir)
   (match-let ([(list x y) from])
     (match dir
@@ -67,6 +42,7 @@
       ['NE (list (add1 x) (sub1 y))]
       ['SW (list (sub1 x) (add1 y))]
       ['SE (list (add1 x) (add1 y))])))
+
 (define (turn-around dir)
   (match dir
     ['N 'S]
@@ -80,7 +56,7 @@
 
 
 ; Word Search Functions ---------------------------------------------------------
-; build a mapping from coordinate to letter
+; read a file and build a mapping from coordinate to letter
 (define (build-search-mapping path)
   (for/fold ([search (hash)]
              [y 0]
@@ -109,11 +85,6 @@
 
 
 ; Searching for patterns in a word search
-(define (hash-equal-at? ht1 ht2 key)
-  (and
-   (hash-has-key? ht1 key)
-   (hash-has-key? ht2 key)
-   (equal? (hash-ref ht1 key) (hash-ref ht2 key))))
 
 (define (has-pattern-at? word-search at pattern)
   (for/fold ([errored? #f]
@@ -139,6 +110,12 @@
            [count (counter word-search coordinate letter)])
       (+ occurrences count))))
 
+(define (build-simple-counter trigger-letter patterns)
+  (λ (ws coord word-search-letter)
+      (if (equal? word-search-letter trigger-letter)
+          (count-patterns-at ws coord patterns)
+          0)))
+
 ; Computing Solutions ---------------------------------------
 
 ; Read data -----------------------------
@@ -146,31 +123,20 @@
 
 ; Part 1 --------------------------------
 (define xmas-patterns (build-word-patterns "XMAS"))
-  
-(define (count-xmas-patterns word-search coordinate letter)
-  (if (equal? letter #\X)
-      (count-patterns-at word-search coordinate xmas-patterns)
-      0))
 
-(count-occurrences word-search count-xmas-patterns)
-
+(time
+ (let ([count-xmas-patterns (build-simple-counter #\X xmas-patterns)])
+   (count-occurrences word-search count-xmas-patterns))
+ )
 ; Part 2 --------------------------------
 
 (define cross-mass-patterns
   (let* ([dirs-of-interest  '((SE SW) (SW NW) (NW NE) (NE SE))]
-         [f (λ (dir) (build-word-pattern (turn-around dir) "MAS" (step (list 0 0) dir)))]
-         [g (λ (dirs) (apply hash-union (map f dirs) #:combine (λ (a b) a)))])
-    (map g dirs-of-interest)))
+         [build-word-from (λ (dir) (build-word-pattern (turn-around dir) "MAS" (step (list 0 0) dir)))]
+         [build-pattern-from (λ (dirs) (apply hash-union (map build-word-from dirs) #:combine (λ (a b) a)))])
+    (map build-pattern-from dirs-of-interest)))
 
-(define (count-cross-mass-patterns word-search coordinate letter)
-  (if (equal? letter #\A)
-      (count-patterns-at word-search coordinate cross-mass-patterns)
-      0))
-  
-(count-occurrences word-search count-cross-mass-patterns)
-
-
-
-
-; Scratch ---------------------------
-
+(time
+ (let ([count-cross-mass-patterns (build-simple-counter #\A cross-mass-patterns)])
+   (count-occurrences word-search count-cross-mass-patterns))
+ )
